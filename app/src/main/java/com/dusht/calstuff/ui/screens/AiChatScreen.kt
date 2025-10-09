@@ -23,6 +23,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -276,34 +277,41 @@ fun MessageInputBox(
     }
 }
 
-// strings.xml
-/*
-<resources>
-    <string name="chat_title">Chat</string>
-    <string name="back_button">Back</string>
-    <string name="type_message_hint">Type a message...</string>
-    <string name="send_message">Send Message</string>
-    <string name="message_image">Message Image</string>
-</resources>
-*/
+@Composable
+@Preview(showBackground = true, showSystemUi = true)
+fun AiChatScreenPreview() {
+    val sampleMessages = listOf(
+        ChatMessage(
+            id = "1",
+            message = "Hey there! How are you doing?",
+            timestamp = "10:00 AM",
+            isSentByUser = false
+        ),
+        ChatMessage(
+            id = "2",
+            message = "I'm good! Just working on the project. You?",
+            timestamp = "10:02 AM",
+            isSentByUser = true
+        ),
+        ChatMessage(
+            id = "3",
+            message = "Same here, almost done with my part!",
+            timestamp = "10:05 AM",
+            isSentByUser = false
+        ),
+        ChatMessage(
+            id = "4",
+            message = "Nice! Let's review it together later.",
+            timestamp = "10:07 AM",
+            isSentByUser = true
+        )
+    )
 
-// colors.xml (Material3 Theme)
-/*
-<resources>
-    <!-- Use Material Theme Builder for generating colors -->
-    <!-- https://m3.material.io/theme-builder -->
-</resources>
-*/
-
-// drawable/chat_background.xml (Alternative to image)
-/*
-<?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <gradient
-        android:angle="135"
-        android:startColor="#E3F2FD"
-        android:centerColor="#BBDEFB"
-        android:endColor="#90CAF9"
-        android:type="linear" />
-</shape>
-*/
+    MaterialTheme {
+        AiChatScreen(
+            onBackClick = {},
+            messages = sampleMessages,
+            onSendMessage = {}
+        )
+    }
+}
