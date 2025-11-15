@@ -1,10 +1,16 @@
 <resources>
     <string name="app_name">CalStuff</string>
 
+
+    <string name="web_client_id">727067845239-mj8t1dmuhq5j4fau5njn72fabfc2m5cc.apps.googleusercontent.com</string>
+
     <string name="chat_title">Chat</string>
     <string name="back_button">Back</string>
     <string name="type_message_hint">Type a message...</string>
     <string name="send_message">Send Message</string>
     <string name="message_image">Message Image</string>
+    <string name="home">Home</string>
+    <string name="aichat">AiChat</string>
+    <string name="logs">Logs</string>
 
 </resources>
