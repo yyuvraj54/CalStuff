@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "727067845239",
+    "project_id": "calstuff-9340b",
+    "storage_bucket": "calstuff-9340b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:727067845239:android:b0e2985d3716556264dc72",
+        "android_client_info": {
+          "package_name": "com.dusht.calstuff"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "727067845239-0vs1verebq57ml1s6sabpadujv81ftjb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dusht.calstuff",
+            "certificate_hash": "4d3796f0634c569f9132f30f6270177b05f5f239"
+          }
+        },
+        {
+          "client_id": "727067845239-p7ajtqbjaafs3b44gbjr9sjdamor7vv8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB6ji0gM_maIFS12bGBlRVfMUBZhM4iOjc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "727067845239-mj8t1dmuhq5j4fau5njn72fabfc2m5cc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

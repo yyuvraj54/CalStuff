@@ -1,4 +1,4 @@
-package com.dusht.calstuff.ui.screens
+package com.dusht.calstuff.ui.screens.navscreen.chat
 
 
 import androidx.compose.foundation.Image
