@@ -38,6 +38,7 @@ data class ChatMessage(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AiChatScreen(
+    showTopBar: Boolean = true,
     onBackClick: () -> Unit = {},
     messages: List<ChatMessage> = emptyList(),
     onSendMessage: (String) -> Unit = {}
@@ -47,10 +48,12 @@ fun AiChatScreen(
 
     Scaffold(
         topBar = {
-            ChatTopBar(
-                title = stringResource(id = R.string.chat_title),
-                onBackClick = onBackClick
-            )
+            if (showTopBar) {
+                ChatTopBar(
+                    title = stringResource(id = R.string.chat_title),
+                    onBackClick = onBackClick
+                )
+            }
         },
         containerColor = MaterialTheme.colorScheme.surface
     ) { paddingValues ->

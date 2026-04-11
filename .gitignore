@@ -1,15 +1,28 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+# Gradle / Kotlin
+.gradle/
+build/
+**/build/
+.kotlin/
+
+# Local machine
 local.properties
+*.hprof
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+captures/
+.externalNativeBuild/
+.cxx/
+
+# OS
+.DS_Store
+
+# KMP / native (Konan caches live in user home; build outputs above cover module build/)
+
+# Xcode / Swift (if you open ios/ in Xcode locally)
+*.xcuserstate
+xcuserdata/
+DerivedData/

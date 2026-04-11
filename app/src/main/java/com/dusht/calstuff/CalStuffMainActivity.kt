@@ -4,12 +4,15 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -17,39 +20,49 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.dusht.calstuff.navigation.AppNavController
-import com.dusht.calstuff.navigation.BottomNavDestination
-import com.dusht.calstuff.ui.theme.CalStuffTheme
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
-import com.dusht.calstuff.navigation.LocalAppNavController
-import android.content.Context
 import com.dusht.calstuff.navigation.AppNavGraph
+import com.dusht.calstuff.navigation.BottomNavDestination
+import com.dusht.calstuff.navigation.LocalAppNavController
+import com.dusht.calstuff.ui.theme.CalStuffTheme
+import com.dusht.calstuff.vm.MainViewModel
+import com.dusht.core.logging.AppLogger
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class CalStuffMainActivity : ComponentActivity() {
+
+    private val mainViewModel: MainViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AppLogger.lifecycle(
+            message = "CalStuffMainActivity.onCreate",
+            extras = mapOf("savedState" to (savedInstanceState != null))
+        )
         enableEdgeToEdge()
         setContent {
             CalStuffTheme {
-                val isLoggedIn = checkLoginStatus()
-                val hasCompletedOnboarding = checkOnboardingStatus()
-
                 CalStuffApp(
-                    isLoggedIn = isLoggedIn,
-                    hasCompletedOnboarding = hasCompletedOnboarding
+                    isLoggedIn = mainViewModel.isLoggedIn(),
+                    hasCompletedOnboarding = mainViewModel.hasCompletedOnboarding()
                 )
             }
         }
     }
 
-    private fun checkLoginStatus(): Boolean {
-        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        return prefs.getBoolean("is_logged_in", false)
+    override fun onResume() {
+        super.onResume()
+        AppLogger.lifecycle(message = "CalStuffMainActivity.onResume")
     }
 
-    private fun checkOnboardingStatus(): Boolean {
-        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        return prefs.getBoolean("onboarding_completed", false)
+    override fun onPause() {
+        AppLogger.lifecycle(message = "CalStuffMainActivity.onPause")
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        AppLogger.lifecycle(message = "CalStuffMainActivity.onDestroy")
+        super.onDestroy()
     }
 }
 
@@ -65,11 +78,10 @@ fun CalStuffApp(
         AppNavGraph(
             appNavController = appNavController,
             isLoggedIn = isLoggedIn,
-            hasCompletedOnboarding = hasCompletedOnboarding,
+            hasCompletedOnboarding = hasCompletedOnboarding
         )
     }
 }
-
 
 @Composable
 fun MainBottomNavBar(appNavController: AppNavController) {

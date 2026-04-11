@@ -1,103 +1,174 @@
-//package com.dusht.calstuff.vm
-//
-//import android.content.Context
-//import android.content.Intent
-//import androidx.activity.compose.ManagedActivityResultLauncher
-//import androidx.activity.result.ActivityResult
-//import androidx.lifecycle.ViewModel
-//import androidx.lifecycle.viewModelScope
-//import com.dusht.calstuff.login.GoogleSignInUtils
-//import dagger.hilt.android.lifecycle.HiltViewModel
-//import kotlinx.coroutines.flow.MutableStateFlow
-//import kotlinx.coroutines.flow.StateFlow
-//import kotlinx.coroutines.flow.asStateFlow
-//import kotlinx.coroutines.launch
-//import javax.inject.Inject
-//
-//sealed class LoginState {
-//    object Idle : LoginState()
-//    object Loading : LoginState()
-//    data class Success(val userProfile: UserProfile) : LoginState()
-//    data class Error(val message: String) : LoginState()
-//}
-//
-//// MVI Intent
-//sealed class LoginIntent {
-//    data class GoogleSignIn(
-//        val context: Context,
-//        val launcher: ManagedActivityResultLauncher<Intent, ActivityResult>?
-//    ) : LoginIntent()
-//    object ResetState : LoginIntent()
-//}
-//
-//// MVI Effect (One-time events)
-//sealed class LoginEffect {
-//    object NavigateToHome : LoginEffect()
-//    data class ShowToast(val message: String) : LoginEffect()
-//}
-//
-//@HiltViewModel
-//class LoginViewModel @Inject constructor(
-//    private val userRepository: UserRepository
-//) : ViewModel() {
-//
-//    private val _state = MutableStateFlow<LoginState>(LoginState.Idle)
-//    val state: StateFlow<LoginState> = _state.asStateFlow()
-//
-//    private val _effect = MutableStateFlow<LoginEffect?>(null)
-//    val effect: StateFlow<LoginEffect?> = _effect.asStateFlow()
-//
-//    fun handleIntent(intent: LoginIntent) {
-//        when (intent) {
-//            is LoginIntent.GoogleSignIn -> {
-//                performGoogleSignIn(intent.context, intent.launcher)
-//            }
-//            is LoginIntent.ResetState -> {
-//                _state.value = LoginState.Idle
-//            }
-//        }
-//    }
-//
-//    private fun performGoogleSignIn(
-//        context: Context,
-//        launcher: ManagedActivityResultLauncher<Intent, ActivityResult>?
-//    ) {
-//        _state.value = LoginState.Loading
-//
-//        GoogleSignInUtils.doGoogleSignIn(
-//            context = context,
-//            scope = viewModelScope,
-//            launcher = launcher,
-//            login = { userProfile ->
-//                handleLoginSuccess(userProfile)
-//            },
-//            onError = { errorMessage ->
-//                handleLoginError(errorMessage)
-//            }
-//        )
-//    }
-//
-//    private fun handleLoginSuccess(userProfile: UserProfile) {
-//        viewModelScope.launch {
-//            try {
-//                // Save user profile to local database/preferences
-//                userRepository.saveUserProfile(userProfile)
-//
-//                _state.value = LoginState.Success(userProfile)
-//                _effect.value = LoginEffect.NavigateToHome
-//                _effect.value = LoginEffect.ShowToast("Welcome ${userProfile.displayName}!")
-//            } catch (e: Exception) {
-//                _state.value = LoginState.Error("Failed to save user data: ${e.message}")
-//            }
-//        }
-//    }
-//
-//    private fun handleLoginError(message: String) {
-//        _state.value = LoginState.Error(message)
-//        _effect.value = LoginEffect.ShowToast(message)
-//    }
-//
-//    fun clearEffect() {
-//        _effect.value = null
-//    }
-//}
+package com.dusht.calstuff.vm
+
+import android.app.Activity
+import android.content.Context
+import androidx.activity.result.ActivityResult
+import androidx.lifecycle.viewModelScope
+import com.dusht.calstuff.auth.PhoneAuthRepository
+import com.dusht.calstuff.auth.PhoneVerificationStart
+import com.dusht.calstuff.auth.toAuthUserMessage
+import com.dusht.calstuff.login.GoogleSignInUtils
+import com.dusht.calstuff.ui.screens.onboarding.LoginEffect
+import com.dusht.calstuff.ui.screens.onboarding.LoginEvent
+import com.dusht.calstuff.ui.screens.onboarding.LoginUiState
+import com.dusht.calstuff.ui.screens.onboarding.PhoneLoginPhase
+import com.dusht.calstuff.utils.base.BaseViewModel
+import com.dusht.core.logging.AppLogger
+import com.dusht.shared.session.UserSessionRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class LoginViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
+    private val userSessionRepository: UserSessionRepository,
+    private val phoneAuthRepository: PhoneAuthRepository,
+) : BaseViewModel<LoginUiState, LoginEvent, LoginEffect>(LoginUiState()) {
+
+    override fun handleEvent(event: LoginEvent) {
+        when (event) {
+            LoginEvent.GoogleSignInClicked -> {
+                AppLogger.app(message = "LoginEvent.GoogleSignInClicked")
+                setState { copy(errorMessage = null) }
+            }
+            is LoginEvent.LegacyActivityResult -> handleLegacyResult(event.result)
+            LoginEvent.ErrorConsumed -> setState { copy(errorMessage = null) }
+
+            is LoginEvent.PhoneDigitsChanged -> {
+                val digits = event.value.filter { it.isDigit() }.take(PHONE_MAX_DIGITS)
+                val previous = currentState.phoneDigits.filter { it.isDigit() }
+                val wasOtp = currentState.phoneLoginPhase == PhoneLoginPhase.OtpEntry
+                val phoneChangedWhileOtp = wasOtp && digits != previous
+                setState {
+                    copy(
+                        phoneDigits = digits,
+                        phoneLoginPhase = when {
+                            digits.isEmpty() -> PhoneLoginPhase.PhoneEntry
+                            phoneChangedWhileOtp -> PhoneLoginPhase.PhoneEntry
+                            else -> phoneLoginPhase
+                        },
+                        otpDigits = if (digits.isEmpty() || phoneChangedWhileOtp) "" else otpDigits,
+                        pendingVerificationId = if (digits.isEmpty() || phoneChangedWhileOtp) {
+                            null
+                        } else {
+                            pendingVerificationId
+                        }
+                    )
+                }
+            }
+            is LoginEvent.OtpDigitsChanged -> {
+                val digits = event.value.filter { it.isDigit() }.take(OTP_LENGTH)
+                setState { copy(otpDigits = digits) }
+            }
+            is LoginEvent.PhoneContinue -> sendPhoneCode(event.activity)
+            LoginEvent.PhoneVerifyOtp -> verifyOtp()
+        }
+    }
+
+    fun onGoogleSignInSuccess() {
+        viewModelScope.launch {
+            userSessionRepository.setLoggedIn(true)
+            AppLogger.app(message = "Session persisted: logged in")
+            sendEffect(LoginEffect.NavigateAfterLogin)
+        }
+    }
+
+    private fun sendPhoneCode(activity: Activity) {
+        val digits = currentState.phoneDigits.filter { it.isDigit() }
+        if (digits.length < MIN_PHONE_DIGITS) {
+            setState { copy(errorMessage = "Enter a valid phone number") }
+            return
+        }
+        launchIO {
+            setState { copy(isLoading = true, errorMessage = null) }
+            val result = phoneAuthRepository.requestSmsCode(activity, currentState.phoneDigits)
+            result.fold(
+                onSuccess = { start ->
+                    when (start) {
+                        is PhoneVerificationStart.SmsCodeRequired -> {
+                            AppLogger.app(
+                                message = "phone_code_sent",
+                                extras = mapOf("stagingMock" to (start.verificationId == PhoneAuthRepository.STAGING_MOCK_VERIFICATION_ID))
+                            )
+                            setState {
+                                copy(
+                                    pendingVerificationId = start.verificationId,
+                                    phoneLoginPhase = PhoneLoginPhase.OtpEntry,
+                                    otpDigits = ""
+                                )
+                            }
+                        }
+                        PhoneVerificationStart.SignedInByFirebase -> {
+                            AppLogger.app(message = "phone_instant_verification")
+                            finishPhoneLogin()
+                        }
+                    }
+                },
+                onFailure = { e ->
+                    setState { copy(errorMessage = e.toAuthUserMessage()) }
+                }
+            )
+            setState { copy(isLoading = false) }
+        }
+    }
+
+    private fun verifyOtp() {
+        val vid = currentState.pendingVerificationId
+        val code = currentState.otpDigits
+        if (vid.isNullOrBlank() || code.length < OTP_LENGTH) {
+            setState { copy(errorMessage = "Enter the 6-digit code") }
+            return
+        }
+        launchIO {
+            setState { copy(isLoading = true, errorMessage = null) }
+            val result = phoneAuthRepository.submitSmsCode(vid, code)
+            result.fold(
+                onSuccess = {
+                    AppLogger.app(message = "phone_otp_verified")
+                    finishPhoneLogin()
+                },
+                onFailure = { e ->
+                    setState { copy(errorMessage = e.toAuthUserMessage()) }
+                }
+            )
+            setState { copy(isLoading = false) }
+        }
+    }
+
+    private fun finishPhoneLogin() {
+        userSessionRepository.setLoggedIn(true)
+        AppLogger.app(message = "Session persisted: phone login")
+        sendEffect(LoginEffect.NavigateAfterLogin)
+    }
+
+    private fun handleLegacyResult(result: ActivityResult) {
+        launchIO {
+            setState { copy(isLoading = true, errorMessage = null) }
+            val outcome = GoogleSignInUtils.completeLegacySignInFromIntent(appContext, result.data)
+            outcome.fold(
+                onSuccess = {
+                    userSessionRepository.setLoggedIn(true)
+                    AppLogger.app(message = "Legacy sign-in persisted")
+                    sendEffect(LoginEffect.NavigateAfterLogin)
+                },
+                onFailure = { e ->
+                    setState { copy(errorMessage = e.message ?: "Sign-in failed") }
+                }
+            )
+            setState { copy(isLoading = false) }
+        }
+    }
+
+    override fun handleError(exception: Exception) {
+        super.handleError(exception)
+        setState { copy(isLoading = false, errorMessage = exception.message) }
+    }
+
+    private companion object {
+        const val PHONE_MAX_DIGITS = 11
+        const val MIN_PHONE_DIGITS = 10
+        const val OTP_LENGTH = 6
+    }
+}

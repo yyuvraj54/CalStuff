@@ -22,4 +22,5 @@ dependencyResolutionManagement {
 rootProject.name = "CalStuff"
 include(":app")
 include(":data")
-include(":domain")
+include(":shared")
+include(":core-logging")

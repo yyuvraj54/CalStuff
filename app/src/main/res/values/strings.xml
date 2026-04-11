@@ -13,4 +13,14 @@
     <string name="aichat">AiChat</string>
     <string name="logs">Logs</string>
 
+    <string name="login_or">or</string>
+    <string name="login_phone_label">Phone number</string>
+    <string name="login_phone_placeholder">Phone number</string>
+    <string name="login_phone_continue">Continue</string>
+    <string name="login_otp_help">Enter the 6-digit code sent to your number.</string>
+    <string name="login_otp_label">Verification code</string>
+    <string name="login_otp_placeholder">6-digit code</string>
+    <string name="login_verify_otp">Verify &amp; continue</string>
+    <string name="login_staging_hint">Staging: use %1$s · OTP %2$s</string>
+
 </resources>

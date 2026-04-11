@@ -4,10 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.flow.collectLatest
@@ -28,11 +29,13 @@ abstract class BaseActivity<STATE : ViewState, EVENT : ViewEvent, EFFECT : ViewE
 
         setContent {
             val state by viewModel.state.collectAsState()
+            val lifecycleOwner = LocalLifecycleOwner.current
 
-            // Observe side effects
-            LaunchedEffect(Unit) {
-                viewModel.effect.collectLatest { effect ->
-                    handleEffect(effect)
+            LaunchedEffect(lifecycleOwner) {
+                lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    viewModel.effect.collectLatest { effect ->
+                        handleEffect(effect)
+                    }
                 }
             }
 

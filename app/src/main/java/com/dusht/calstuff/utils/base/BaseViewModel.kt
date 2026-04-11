@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import com.dusht.core.logging.AppLogger
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -74,8 +75,11 @@ abstract class BaseViewModel<STATE : ViewState, EVENT : ViewEvent, EFFECT : View
      * Override to handle errors globally
      */
     protected open fun handleError(exception: Exception) {
-        // Log error or send error effect
-        exception.printStackTrace()
+        AppLogger.app(
+            message = "${this::class.simpleName} error",
+            throwable = exception,
+            extras = mapOf("type" to exception.javaClass.simpleName)
+        )
     }
 }
 

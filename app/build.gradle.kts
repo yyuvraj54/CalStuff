@@ -22,6 +22,19 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    flavorDimensions += "environment"
+    productFlavors {
+        create("staging") {
+            dimension = "environment"
+            buildConfigField("boolean", "IS_STAGING", "true")
+        }
+        create("prod") {
+            dimension = "environment"
+            isDefault = true
+            buildConfigField("boolean", "IS_STAGING", "false")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -40,21 +53,28 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
 dependencies {
     val nav_version = "2.9.6"
 
+    implementation(project(":core-logging"))
+    implementation(project(":shared"))
+    implementation(project(":data"))
+
     //Navigation
     implementation("androidx.navigation:navigation-compose:$nav_version") // Jetpack Compose integration
     implementation("androidx.navigation:navigation-fragment:$nav_version") // Views/Fragments integration
     implementation("androidx.navigation:navigation-ui:$nav_version")
     implementation("androidx.navigation:navigation-dynamic-features-fragment:$nav_version") // Feature module support for Fragments
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
+    implementation(libs.kotlinx.serialization.json.lib)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
