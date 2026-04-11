@@ -15,6 +15,9 @@ enum LoginDesignTokens {
     static let verifyButton = Color(red: 0.15, green: 0.65, blue: 0.60) // #26A69A
     static let googleButton = Color(red: 1.0, green: 0.42, blue: 0.42) // #FF6B6B
     static let otpHint = Color(red: 0.45, green: 0.45, blue: 0.45)
+    static let fieldText = Color(red: 0.12, green: 0.14, blue: 0.18)
+    static let fieldPlaceholder = Color(red: 0.55, green: 0.57, blue: 0.62)
+    static let fieldCursor = Color(red: 0.25, green: 0.35, blue: 0.75)
 }
 
 extension Color {

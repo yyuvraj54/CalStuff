@@ -1,12 +1,14 @@
 import SwiftUI
 import UIKit
 
-/// SwiftUI twin of Android `LoginScreen`: white background, hero image, phone → Continue → OTP → Verify, "or" + Google hidden while phone field has digits.
+/// SwiftUI login matching Android `LoginScreen`: flexible hero (`weight(1f)`), form below, bottom-rounded hero.
 struct LoginView: View {
     @ObservedObject var viewModel: LoginViewModel
     var onGoogleSignIn: () -> Void
     var onPhoneContinue: () -> Void
     var onVerifyOtp: () -> Void
+
+    @FocusState private var focusedField: LoginTextFocus?
 
     init(
         viewModel: LoginViewModel,
@@ -20,23 +22,61 @@ struct LoginView: View {
         self.onVerifyOtp = onVerifyOtp
     }
 
+    private static let heroBottomRadius: CGFloat = 32
+
+    private enum ScrollAnchor {
+        static let otpBlock = "otpBlock"
+        static let verifyButton = "verifyButton"
+    }
+
     var body: some View {
-        VStack(spacing: 0) {
-            loginHero
-            ScrollView {
-                VStack(spacing: 16) {
-                    if viewModel.isLoading {
-                        ProgressView()
-                            .padding(16)
-                    }
-                    loginFormContent
+        GeometryReader { geo in
+            let contentWidth = geo.size.width
+            VStack(spacing: 0) {
+                loginHero(width: contentWidth)
+                    .frame(maxHeight: .infinity)
+
+                if viewModel.isLoading {
+                    ProgressView()
+                        .padding(16)
                 }
-                .padding(.horizontal, 32)
-                .padding(.top, 48)
-                .padding(.bottom, 64)
+
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        loginFormContent
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, 32)
+                            .padding(.top, 48)
+                            .padding(.bottom, 32)
+                    }
+                    .frame(maxHeight: .infinity)
+                    .scrollDismissesKeyboard(.interactively)
+                    .onChange(of: viewModel.phonePhase) { _, newPhase in
+                        if newPhase == .otpEntry {
+                            focusedField = .otp
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                                withAnimation(.easeOut(duration: 0.25)) {
+                                    proxy.scrollTo(ScrollAnchor.otpBlock, anchor: .center)
+                                }
+                            }
+                        }
+                    }
+                    .onChange(of: viewModel.otpReady) { _, ready in
+                        if ready {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                                withAnimation(.easeOut(duration: 0.25)) {
+                                    proxy.scrollTo(ScrollAnchor.verifyButton, anchor: .bottom)
+                                }
+                            }
+                        }
+                    }
+                }
             }
+            .frame(width: contentWidth, height: geo.size.height, alignment: .top)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(LoginDesignTokens.background)
+        .keyboardDoneButton()
         .alert(
             "CalStuff",
             isPresented: Binding(
@@ -52,30 +92,43 @@ struct LoginView: View {
         )
     }
 
-    private var loginHero: some View {
-        Group {
-            if let image = UIImage(named: "login_bg") {
-                Image(uiImage: image)
+    private func loginHero(width: CGFloat) -> some View {
+        ZStack {
+            if UIImage(named: "login_bg") != nil {
+                Image("login_bg")
                     .resizable()
                     .scaledToFill()
+                    .frame(width: width)
+                    .frame(maxHeight: .infinity)
+                    .clipped()
             } else {
-                LinearGradient(
-                    colors: [
-                        Color(hex: 0xFFE3F2FD),
-                        Color(hex: 0xFFF3E5F5)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
+                heroGradientFallback
             }
         }
-        .frame(maxWidth: .infinity)
-        .frame(height: 260)
+        .frame(width: width)
+        .frame(maxHeight: .infinity)
         .clipped()
         .clipShape(
-            RoundedRectangle(cornerRadius: 32, style: .continuous)
+            UnevenRoundedRectangle(
+                topLeadingRadius: 0,
+                bottomLeadingRadius: Self.heroBottomRadius,
+                bottomTrailingRadius: Self.heroBottomRadius,
+                topTrailingRadius: 0,
+                style: .continuous
+            )
         )
-        .padding(.horizontal, 0)
+        .ignoresSafeArea(edges: .top)
+    }
+
+    private var heroGradientFallback: some View {
+        LinearGradient(
+            colors: [
+                Color(hex: 0xFFE3F2FD),
+                Color(hex: 0xFFF3E5F5)
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
     }
 
     private var loginFormContent: some View {
@@ -115,7 +168,7 @@ struct LoginView: View {
 
     private var phoneBlock: some View {
         VStack(spacing: 16) {
-            CalAuraTextField(
+            CalAuraOutlinedTextField(
                 title: "Phone number",
                 placeholder: "Phone number",
                 text: Binding(
@@ -124,11 +177,16 @@ struct LoginView: View {
                 ),
                 keyboard: .phonePad,
                 textContentType: .telephoneNumber,
-                enabled: viewModel.phonePhase == .phoneEntry
+                enabled: viewModel.phonePhase == .phoneEntry,
+                focusTag: .phone,
+                focusedField: $focusedField
             )
 
             if viewModel.phonePhase == .phoneEntry, viewModel.canSendCode {
-                Button(action: onPhoneContinue) {
+                Button(action: {
+                    KeyboardDismiss.endEditing()
+                    onPhoneContinue()
+                }) {
                     Text("Continue")
                         .fontWeight(.semibold)
                         .frame(maxWidth: .infinity)
@@ -146,7 +204,7 @@ struct LoginView: View {
                         .font(.caption)
                         .foregroundStyle(LoginDesignTokens.otpHint)
 
-                    CalAuraTextField(
+                    CalAuraOutlinedTextField(
                         title: "Verification code",
                         placeholder: "6-digit code",
                         text: Binding(
@@ -155,11 +213,16 @@ struct LoginView: View {
                         ),
                         keyboard: .numberPad,
                         textContentType: .oneTimeCode,
-                        enabled: true
+                        enabled: true,
+                        focusTag: .otp,
+                        focusedField: $focusedField
                     )
 
                     if viewModel.otpReady {
-                        Button(action: onVerifyOtp) {
+                        Button(action: {
+                            KeyboardDismiss.endEditing()
+                            onVerifyOtp()
+                        }) {
                             Text("Verify & continue")
                                 .fontWeight(.semibold)
                                 .frame(maxWidth: .infinity)
@@ -169,15 +232,20 @@ struct LoginView: View {
                         .foregroundStyle(.white)
                         .background(LoginDesignTokens.verifyButton)
                         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .id(ScrollAnchor.verifyButton)
                     }
                 }
                 .padding(.top, 8)
+                .id(ScrollAnchor.otpBlock)
             }
         }
     }
 
     private var googleButton: some View {
-        Button(action: onGoogleSignIn) {
+        Button(action: {
+            KeyboardDismiss.endEditing()
+            onGoogleSignIn()
+        }) {
             HStack(spacing: 12) {
                 if UIImage(named: "google_btn_icon") != nil {
                     Image("google_btn_icon")
