@@ -49,6 +49,8 @@ For **device** builds:
 
 **Requires Xcode + Command Line Tools** for linking.
 
+**Broader plan (networking mocks, prod backend, Watch, documentation index):** [`docs/CROSS_PLATFORM_ARCHITECTURE.md`](../docs/CROSS_PLATFORM_ARCHITECTURE.md).
+
 ## Next steps
 
 - Move validation and session **rules** from Android-only code into `commonMain` where it makes sense.
