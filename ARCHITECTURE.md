@@ -2,6 +2,8 @@
 
 This document describes how the Android app is structured today and how it is intended to scale with Kotlin Multiplatform (KMP) and an iOS (SwiftUI) client.
 
+**Cross-platform strategy, prod vs mock networking, roadmap, and iOS learning notes:** see **[`docs/CROSS_PLATFORM_ARCHITECTURE.md`](docs/CROSS_PLATFORM_ARCHITECTURE.md)**.
+
 ## Goals
 
 - **MVI + Jetpack Compose** on Android: single-direction data flow (State → UI, Events → ViewModel, one-shot Effects for navigation/snackbars).

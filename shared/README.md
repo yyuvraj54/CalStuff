@@ -19,11 +19,25 @@ Shared **business contracts** and **commonMain** code are used by:
 
 ## Layout
 
-| Source set    | Purpose |
-|---------------|---------|
-| `commonMain` | Interfaces, models, use cases, expect/actual APIs. |
-| `androidMain` | Optional Android-specific `actual` implementations. |
-| `iosMain`     | Optional iOS-specific `actual` implementations. |
+| Source set    | On disk (under `shared/src/`) | Purpose |
+|---------------|------------------------------|---------|
+| `commonMain`  | **`commonMain/kotlin/...`**   | Interfaces, models, use cases, `expect` declarations. |
+| `androidMain` | **`androidMain/kotlin/...`** | Optional Android-specific `actual` implementations. |
+| `iosMain`     | **`iosMain/kotlin/...`**     | Optional iOS-specific `actual` implementations. |
+
+There are **no** Gradle source sets named `platform`, `platform.android`, or `platform.ios` in this project. If you created folders with those names, they are **not** wired into KMP unless you add custom `sourceSets { }` blocks in `shared/build.gradle.kts` — the standard names above are what Kotlin uses.
+
+### What is in those folders today?
+
+Minimal **expect/actual** wiring to prove the module compiles for Android and iOS:
+
+| File | Role |
+|------|------|
+| `commonMain/.../Platform.kt` | `expect fun calStuffPlatformName(): String` |
+| `androidMain/.../Platform.android.kt` | `actual` → `"Android"` |
+| `iosMain/.../Platform.ios.kt` | `actual` → `"iOS"` |
+
+Most **product** code still lives in **`:app` / `:data` (Android)** and **Swift (iOS)**. You add more under `commonMain` / `androidMain` / `iosMain` only when you need **shared Kotlin** that differs per platform (e.g. `expect fun readMockJson(path: String): String` with `actual` reading Assets vs Bundle).
 
 `UserSessionRepository` lives in `commonMain`; Android implements it in `:data`. On iOS, implement the same interface (e.g. `UserDefaults` / Keychain) in Kotlin `iosMain` or bridge from Swift.
 
@@ -48,6 +62,10 @@ For **device** builds:
 ```
 
 **Requires Xcode + Command Line Tools** for linking.
+
+**Firebase (Android + iOS):** [`docs/FIREBASE_SETUP.md`](../docs/FIREBASE_SETUP.md).
+
+**Broader plan (networking mocks, prod backend, Watch, documentation index):** [`docs/CROSS_PLATFORM_ARCHITECTURE.md`](../docs/CROSS_PLATFORM_ARCHITECTURE.md).
 
 ## Next steps
 

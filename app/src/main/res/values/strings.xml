@@ -2,7 +2,8 @@
     <string name="app_name">CalStuff</string>
 
 
-    <string name="web_client_id">727067845239-mj8t1dmuhq5j4fau5njn72fabfc2m5cc.apps.googleusercontent.com</string>
+    <!-- Google Sign-In: Web client ID (…apps.googleusercontent.com). Leave empty to use default_web_client_id from google-services.json once OAuth clients exist; or paste from Firebase → Authentication → Google. -->
+    <string name="web_client_id" translatable="false"></string>
 
     <string name="chat_title">Chat</string>
     <string name="back_button">Back</string>
@@ -22,5 +23,29 @@
     <string name="login_otp_placeholder">6-digit code</string>
     <string name="login_verify_otp">Verify &amp; continue</string>
     <string name="login_staging_hint">Staging: use %1$s · OTP %2$s</string>
+
+    <string name="profile_step_name_title">What should we call you?</string>
+    <string name="profile_step_age_title">How old are you?</string>
+    <string name="profile_step_gender_title">How do you identify?</string>
+    <string name="profile_step_height_title">What is your height?</string>
+    <string name="profile_step_height_suffix">centimeters</string>
+    <string name="profile_step_weight_title">What is your weight?</string>
+    <string name="profile_step_weight_suffix">kilograms</string>
+    <string name="profile_step_activity_title">How active are you most days?</string>
+    <string name="profile_name_placeholder">Your name</string>
+    <string name="profile_age_placeholder">Age</string>
+    <string name="profile_continue">Continue</string>
+    <string name="profile_finish">Finish</string>
+
+    <string name="profile_gender_male">Male</string>
+    <string name="profile_gender_female">Female</string>
+    <string name="profile_gender_other">Other</string>
+    <string name="profile_gender_prefer_not">Prefer not to say</string>
+
+    <string name="profile_activity_sedentary">Mostly seated / little movement</string>
+    <string name="profile_activity_light">Light activity a few times a week</string>
+    <string name="profile_activity_moderate">Moderate exercise most days</string>
+    <string name="profile_activity_active">Active most days</string>
+    <string name="profile_activity_very_active">Very active / athlete</string>
 
 </resources>

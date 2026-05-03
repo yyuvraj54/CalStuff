@@ -30,6 +30,26 @@ import kotlinx.coroutines.withContext
 
 object GoogleSignInUtils {
 
+    /**
+     * OAuth 2.0 **Web client ID** (ends with `.apps.googleusercontent.com`).
+     * Prefer `strings.xml` → [R.string.web_client_id]; if empty, uses the value generated from
+     * `google-services.json` when Firebase has populated `oauth_client` (after enabling Google sign-in + SHA-1).
+     */
+    private fun Context.googleOAuthServerClientId(): String {
+        val manual = getString(R.string.web_client_id).trim()
+        if (manual.isNotEmpty()) return manual
+        val resId = resources.getIdentifier("default_web_client_id", "string", packageName)
+        if (resId != 0) {
+            val auto = getString(resId).trim()
+            if (auto.isNotEmpty()) return auto
+        }
+        throw IllegalStateException(
+            "Google Sign-In: set res/values/strings.xml → web_client_id to your Web client ID " +
+                "(Firebase Console → Authentication → Sign-in method → Google), " +
+                "or add your debug/release SHA-1, enable Google, and re-download google-services.json."
+        )
+    }
+
     fun doGoogleSignIn(
         context: Context,
         scope: CoroutineScope,
@@ -49,7 +69,11 @@ object GoogleSignInUtils {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             signInWithCredentialManager(appContext, scope, launcher, onSuccess, onError)
         } else {
-            signInWithGoogleClient(appContext, launcher)
+            try {
+                signInWithGoogleClient(appContext, launcher)
+            } catch (e: IllegalStateException) {
+                onError(e.message ?: "Google Sign-In not configured")
+            }
         }
     }
 
@@ -89,12 +113,19 @@ object GoogleSignInUtils {
         onSuccess: () -> Unit,
         onError: (String) -> Unit
     ) {
+        val serverClientId = try {
+            context.googleOAuthServerClientId()
+        } catch (e: IllegalStateException) {
+            onError(e.message ?: "Google Sign-In not configured")
+            return
+        }
+
         val credentialManager = CredentialManager.create(context)
 
         val googleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
             .setAutoSelectEnabled(false)
-            .setServerClientId(context.getString(R.string.web_client_id))
+            .setServerClientId(serverClientId)
             .build()
 
         val request = GetCredentialRequest.Builder()
@@ -149,7 +180,7 @@ object GoogleSignInUtils {
         launcher: ManagedActivityResultLauncher<Intent, ActivityResult>?
     ) {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(context.getString(R.string.web_client_id))
+            .requestIdToken(context.googleOAuthServerClientId())
             .requestEmail()
             .build()
 

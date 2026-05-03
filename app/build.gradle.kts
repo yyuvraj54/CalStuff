@@ -81,14 +81,15 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation("androidx.compose.material:material-icons-extended")
 
     // Credential Manager
     implementation(libs.googleid.v110)
     implementation(libs.androidx.credentials.v122)
     implementation(libs.androidx.credentials.play.services.auth.v122)
 
-    // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
+    // Firebase (BOM aligns Auth + future products; no version on artifacts — BOM controls versions)
+    implementation(platform(libs.firebase.bom))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.android.gms:play-services-auth:21.2.0")
 
