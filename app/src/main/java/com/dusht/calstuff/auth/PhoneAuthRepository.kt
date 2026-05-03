@@ -3,11 +3,10 @@ package com.dusht.calstuff.auth
 import android.app.Activity
 import com.dusht.calstuff.BuildConfig
 import com.google.firebase.FirebaseException
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import java.util.concurrent.TimeUnit
@@ -24,7 +23,7 @@ import kotlin.coroutines.resume
 @Singleton
 class PhoneAuthRepository @Inject constructor() {
 
-    private val auth get() = Firebase.auth
+    private val auth get() = FirebaseAuth.getInstance()
 
     suspend fun requestSmsCode(activity: Activity, phoneDigits: String): Result<PhoneVerificationStart> {
         val digits = phoneDigits.filter { it.isDigit() }
@@ -101,14 +100,22 @@ class PhoneAuthRepository @Inject constructor() {
     companion object {
         internal const val STAGING_MOCK_VERIFICATION_ID = "staging_mock_vid"
 
-        /** Staging flavor only — matches QA test login (11 digits). */
-        const val STAGING_TEST_PHONE_DIGITS = "12345678910"
+        /**
+         * Staging flavor only — digits as entered in the phone field (no +).
+         * Matches Firebase Auth test phone **+91 9999999999** with test OTP [STAGING_TEST_OTP].
+         */
+        const val STAGING_TEST_PHONE_DIGITS = "9999999999"
         const val STAGING_TEST_OTP = "999999"
 
+        /**
+         * E.164 for Firebase Phone Auth. Supports India (+91) 10-digit national numbers and US-style 11-digit.
+         */
         internal fun digitsToE164(digits: String): String {
             val d = digits.filter { it.isDigit() }
             return when {
+                d.length == 12 && d.startsWith("91") -> "+$d"
                 d.length == 11 && d.startsWith("1") -> "+$d"
+                d.length == 10 && d.first() in '6'..'9' -> "+91$d"
                 d.length == 10 -> "+1$d"
                 else -> "+$d"
             }

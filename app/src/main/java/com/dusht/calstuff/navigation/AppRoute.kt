@@ -11,6 +11,9 @@ sealed interface AppRoute {
     data object Login : AppRoute
 
     @Serializable
+    data object PostLogin : AppRoute
+
+    @Serializable
     data object OnboardingForm : AppRoute
 
     @Serializable

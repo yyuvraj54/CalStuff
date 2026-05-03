@@ -1,8 +1,9 @@
 import Foundation
 
-/// Match Android `BuildConfig.IS_STAGING` — set to `true` in staging Xcode configurations if you use build settings, or flip manually for QA.
+/// Match Android `BuildConfig.IS_STAGING` — set `true` for QA builds.
 enum LoginConfig {
     static let isStaging = false
-    static let stagingPhoneDigits = "12345678910"
+    /// Digits only — same as Firebase test phone +91 9999999999
+    static let stagingPhoneDigits = "9999999999"
     static let stagingOtp = "999999"
 }

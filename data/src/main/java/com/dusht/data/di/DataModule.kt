@@ -3,7 +3,9 @@ package com.dusht.data.di
 import com.dusht.core.logging.AppLogger
 import com.dusht.data.BuildConfig
 import com.dusht.data.network.TimberHttpLoggingInterceptor
+import com.dusht.data.profile.ProfileGateRepositoryImpl
 import com.dusht.data.session.UserSessionRepositoryImpl
+import com.dusht.shared.profile.ProfileGateRepository
 import com.dusht.shared.session.UserSessionRepository
 import dagger.Binds
 import dagger.Module
@@ -22,6 +24,10 @@ abstract class DataBindsModule {
     @Binds
     @Singleton
     abstract fun bindUserSessionRepository(impl: UserSessionRepositoryImpl): UserSessionRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindProfileGateRepository(impl: ProfileGateRepositoryImpl): ProfileGateRepository
 }
 
 @Module

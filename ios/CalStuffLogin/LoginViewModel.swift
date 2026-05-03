@@ -1,7 +1,7 @@
 import Foundation
 import Combine
 
-/// Mirrors Android `LoginUiState` / `PhoneLoginPhase` for the same UX flow (phone first, OTP, Google hides when typing).
+@MainActor
 final class LoginViewModel: ObservableObject {
     enum PhonePhase {
         case phoneEntry
@@ -17,6 +17,9 @@ final class LoginViewModel: ObservableObject {
     @Published var phonePhase: PhonePhase = .phoneEntry
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
+    @Published var didCompleteLogin: Bool = false
+
+    private var verificationId: String?
 
     var hasPhoneInput: Bool {
         phoneDigits.contains { $0.isNumber }
@@ -40,6 +43,7 @@ final class LoginViewModel: ObservableObject {
         if filtered.isEmpty || phoneChangedWhileOtp {
             phonePhase = .phoneEntry
             otpDigits = ""
+            verificationId = nil
         }
     }
 
@@ -47,10 +51,48 @@ final class LoginViewModel: ObservableObject {
         otpDigits = String(raw.filter { $0.isNumber }.prefix(Self.otpLength))
     }
 
-    /// Call after a successful Continue (code sent).
-    func moveToOtpEntry() {
-        phonePhase = .otpEntry
-        otpDigits = ""
+    func sendPhoneVerificationCode() async {
+        guard canSendCode else { return }
+        isLoading = true
+        errorMessage = nil
+        defer { isLoading = false }
+        do {
+            let vid = try await FirebaseAuthService.sendPhoneVerificationCode(phoneDigits: phoneDigits)
+            verificationId = vid
+            phonePhase = .otpEntry
+            otpDigits = ""
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func verifySmsCode() async {
+        guard let vid = verificationId, otpReady else { return }
+        isLoading = true
+        errorMessage = nil
+        defer { isLoading = false }
+        do {
+            try await FirebaseAuthService.signInWithSmsCode(verificationId: vid, smsCode: otpDigits)
+            didCompleteLogin = true
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func signInWithGoogle() async {
+        guard let root = UIWindowSceneKeyWindow.rootViewController else {
+            errorMessage = "Could not find a view controller for Google sign-in."
+            return
+        }
+        isLoading = true
+        errorMessage = nil
+        defer { isLoading = false }
+        do {
+            try await FirebaseAuthService.signInWithGoogle(presenting: root)
+            didCompleteLogin = true
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 
     func consumeError() {

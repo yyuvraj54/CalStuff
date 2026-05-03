@@ -20,6 +20,7 @@ import com.dusht.calstuff.ui.screens.navscreen.home.HomeScreen
 import com.dusht.calstuff.ui.screens.navscreen.logs.LogsScreen
 import com.dusht.calstuff.ui.screens.onboarding.LoginScreen
 import com.dusht.calstuff.ui.screens.onboarding.OnboardingFormScreen
+import com.dusht.calstuff.ui.screens.onboarding.PostLoginScreen
 import com.dusht.calstuff.vm.MainViewModel
 import com.dusht.core.logging.AppLogger
 
@@ -87,7 +88,18 @@ private fun AppNavHostContent(
         composable<AppRoute.Login> {
             LoginScreen(
                 onLoginSuccess = {
+                    appNavController.navigateAndClearBackStack(AppRoute.PostLogin)
+                }
+            )
+        }
+
+        composable<AppRoute.PostLogin> {
+            PostLoginScreen(
+                onNavigateToProfileOnboarding = {
                     appNavController.navigateAndClearBackStack(AppRoute.OnboardingForm)
+                },
+                onNavigateToHome = {
+                    appNavController.navigateAndClearBackStack(AppRoute.Home)
                 }
             )
         }
