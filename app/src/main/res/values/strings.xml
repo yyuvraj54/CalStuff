@@ -11,8 +11,10 @@
     <string name="send_message">Send Message</string>
     <string name="message_image">Message Image</string>
     <string name="home">Home</string>
+    <string name="home_greeting">Hi, %1$s</string>
     <string name="aichat">AiChat</string>
     <string name="logs">Logs</string>
+    <string name="log_out">Log out</string>
 
     <string name="login_or">or</string>
     <string name="login_phone_label">Phone number</string>

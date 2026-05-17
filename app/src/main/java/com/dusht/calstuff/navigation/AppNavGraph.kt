@@ -14,13 +14,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.toRoute
 import com.dusht.calstuff.MainBottomNavBar
-import com.dusht.calstuff.ui.screens.navscreen.chat.AiChatScreen
-import com.dusht.calstuff.ui.screens.navscreen.chat.ChatMessage
+import com.dusht.calstuff.ui.screens.navscreen.ProfileTabScreen
+import com.dusht.calstuff.ui.screens.navscreen.TitleOnlyTabScreen
 import com.dusht.calstuff.ui.screens.navscreen.home.HomeScreen
-import com.dusht.calstuff.ui.screens.navscreen.logs.LogsScreen
 import com.dusht.calstuff.ui.screens.onboarding.LoginScreen
 import com.dusht.calstuff.ui.screens.onboarding.OnboardingFormScreen
 import com.dusht.calstuff.ui.screens.onboarding.PostLoginScreen
+import com.dusht.calstuff.R
 import com.dusht.calstuff.vm.MainViewModel
 import com.dusht.core.logging.AppLogger
 
@@ -117,25 +117,17 @@ private fun AppNavHostContent(
         }
 
         composable<AppRoute.Search> {
-            AiChatScreen(
-                showTopBar = false,
-                messages = sampleChatMessages(),
-                onSendMessage = { msg ->
-                    AppLogger.app(
-                        message = "Chat send (local demo)",
-                        extras = mapOf("length" to msg.length)
-                    )
-                }
-            )
+            TitleOnlyTabScreen(titleRes = R.string.aichat)
         }
 
         composable<AppRoute.Profile> {
             val mainViewModel: MainViewModel = hiltViewModel()
-            LogsScreen(
+            ProfileTabScreen(
+                titleRes = R.string.logs,
                 onLogout = {
                     mainViewModel.logout()
                     appNavController.navigateAndClearBackStack(AppRoute.Login)
-                }
+                },
             )
         }
 
@@ -149,21 +141,6 @@ private fun AppNavHostContent(
         }
     }
 }
-
-private fun sampleChatMessages(): List<ChatMessage> = listOf(
-    ChatMessage(
-        id = "1",
-        message = "Hey there! How are you doing?",
-        timestamp = "10:00 AM",
-        isSentByUser = false
-    ),
-    ChatMessage(
-        id = "2",
-        message = "I'm good! Tracking meals today.",
-        timestamp = "10:02 AM",
-        isSentByUser = true
-    )
-)
 
 private fun getStartDestination(isLoggedIn: Boolean, hasCompletedOnboarding: Boolean): AppRoute {
     return when {
