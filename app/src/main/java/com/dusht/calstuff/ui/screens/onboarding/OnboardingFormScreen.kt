@@ -54,8 +54,10 @@ fun OnboardingFormScreen(
                     onClick = {
                         when (profileVm.onContinue()) {
                             ProfileOnboardingContinueResult.Finished -> {
-                                mainViewModel.completeOnboarding()
-                                onComplete()
+                                profileVm.submitFinishAndNavigate {
+                                    mainViewModel.completeOnboarding()
+                                    onComplete()
+                                }
                             }
                             ProfileOnboardingContinueResult.Advanced,
                             ProfileOnboardingContinueResult.Invalid -> Unit

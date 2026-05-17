@@ -12,6 +12,7 @@ object AppLogger {
     private const val TAG_NAV = "NAV"
     private const val TAG_LIFECYCLE = "LIFECYCLE"
     private const val TAG_APP = "APP"
+    private const val TAG_FIREBASE = "FIREBASE"
 
     fun api(
         message: String,
@@ -41,6 +42,15 @@ object AppLogger {
         throwable: Throwable? = null
     ) {
         log(TAG_APP, message, extras, throwable)
+    }
+
+    /** Firestore / Firebase Auth — filter Logcat tag `FIREBASE`. */
+    fun firebase(
+        message: String,
+        extras: Map<String, Any?> = emptyMap(),
+        throwable: Throwable? = null
+    ) {
+        log(TAG_FIREBASE, message, extras, throwable)
     }
 
     private fun log(

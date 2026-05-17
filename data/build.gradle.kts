@@ -41,7 +41,13 @@ dependencies {
     implementation(project(":core-logging"))
 
     implementation(libs.androidx.core.ktx)
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
     implementation(libs.kotlinx.coroutines.android)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.10.2")
+
+    implementation(platform(libs.firebase.bom))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
 
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
