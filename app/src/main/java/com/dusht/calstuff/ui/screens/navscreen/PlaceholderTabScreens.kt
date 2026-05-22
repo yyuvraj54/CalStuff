@@ -60,8 +60,5 @@ fun ProfileTabScreen(
                 textAlign = TextAlign.Center,
             )
         }
-        TextButton(onClick = onLogout) {
-            Text(stringResource(R.string.log_out))
-        }
     }
 }

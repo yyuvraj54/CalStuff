@@ -29,6 +29,9 @@ sealed interface AppRoute {
     data class UserDetail(val userId: String) : AppRoute
 
     @Serializable
+    data object ProfileTab : AppRoute
+
+    @Serializable
     data object Settings : AppRoute
 }
 
@@ -55,5 +58,11 @@ enum class BottomNavDestination(
         route = AppRoute.Profile::class,
         selectedIcon = R.drawable.logs_icon,
         unselectedIcon = R.drawable.logs_icon
+    ),
+    PROFILE(
+        titleRes = R.string.profile_tab,
+        route = AppRoute.ProfileTab::class,
+        selectedIcon = R.drawable.profile_icon,
+        unselectedIcon = R.drawable.profile_icon
     )
 }

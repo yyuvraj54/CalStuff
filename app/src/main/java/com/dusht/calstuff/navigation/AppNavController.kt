@@ -17,6 +17,7 @@ class AppNavController(private val navController: NavHostController) {
             BottomNavDestination.HOME -> AppRoute.Home
             BottomNavDestination.AICHAT -> AppRoute.Search
             BottomNavDestination.LOGS -> AppRoute.Profile
+            BottomNavDestination.PROFILE -> AppRoute.ProfileTab
         }
 
         navController.navigate(route) {
