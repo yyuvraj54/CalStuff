@@ -1,12 +1,18 @@
 package com.dusht.calstuff.navigation
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
@@ -17,6 +23,8 @@ import com.dusht.calstuff.MainBottomNavBar
 import com.dusht.calstuff.ui.screens.navscreen.ProfileTabScreen
 import com.dusht.calstuff.ui.screens.navscreen.TitleOnlyTabScreen
 import com.dusht.calstuff.ui.screens.navscreen.home.HomeScreen
+import com.dusht.calstuff.ui.screens.navscreen.logs.LogsScreen
+import com.dusht.calstuff.ui.screens.navscreen.profile.ProfileScreen
 import com.dusht.calstuff.ui.screens.onboarding.LoginScreen
 import com.dusht.calstuff.ui.screens.onboarding.OnboardingFormScreen
 import com.dusht.calstuff.ui.screens.onboarding.PostLoginScreen
@@ -57,18 +65,23 @@ fun AppNavGraph(
 
     val startDestination = getStartDestination(isLoggedIn, hasCompletedOnboarding)
 
-    Scaffold(
-        bottomBar = {
-            if (showBottomBar) {
-                MainBottomNavBar(appNavController = appNavController)
-            }
-        }
-    ) { innerPadding ->
+    Box(modifier = Modifier.fillMaxSize().background(Color(0xFFF3F1EB))) {
         AppNavHostContent(
-            innerPadding = innerPadding,
+            innerPadding = PaddingValues(0.dp),
             appNavController = appNavController,
             startDestination = startDestination
         )
+
+        if (showBottomBar) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(bottom = 16.dp)
+            ) {
+                MainBottomNavBar(appNavController = appNavController)
+            }
+        }
     }
 }
 
@@ -129,6 +142,10 @@ private fun AppNavHostContent(
                     appNavController.navigateAndClearBackStack(AppRoute.Login)
                 },
             )
+        }
+
+        composable<AppRoute.ProfileTab> {
+            ProfileScreen()
         }
 
         composable<AppRoute.UserDetail> { backStackEntry ->

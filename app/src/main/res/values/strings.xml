@@ -14,7 +14,7 @@
     <string name="home_greeting">Hi, %1$s</string>
     <string name="aichat">AiChat</string>
     <string name="logs">Logs</string>
-    <string name="log_out">Log out</string>
+    <string name="profile_tab">Profile</string>
 
     <string name="login_or">or</string>
     <string name="login_phone_label">Phone number</string>
