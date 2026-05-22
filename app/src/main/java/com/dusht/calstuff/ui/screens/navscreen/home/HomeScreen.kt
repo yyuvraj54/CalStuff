@@ -80,6 +80,13 @@ fun HomeScreen(modifier: Modifier = Modifier) {
             config = data.weeklyConfig
         )
 
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Weekly line chart — same data, line view
+        WeeklyLineChartCard(
+            config = data.weeklyConfig
+        )
+
         // Extra bottom spacing for floating nav bar
         Spacer(modifier = Modifier.height(80.dp))
     }
