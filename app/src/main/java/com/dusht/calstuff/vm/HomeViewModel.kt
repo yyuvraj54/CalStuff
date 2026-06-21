@@ -3,7 +3,7 @@ package com.dusht.calstuff.vm
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dusht.shared.session.DisplayNameStore
-import com.dusht.shared.profile.UserProfileRepository
+import com.dusht.shared.repository.UserProfileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +22,8 @@ class HomeViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            userProfileRepository.loadProfile()
+            val profile = userProfileRepository.getProfile()
+            profile?.name?.trim()?.takeIf { it.isNotEmpty() }?.let { displayNameStore.set(it) }
             _displayName.value = displayNameStore.get().orEmpty()
         }
     }

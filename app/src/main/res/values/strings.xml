@@ -13,6 +13,7 @@
     <string name="home">Home</string>
     <string name="home_greeting">Hi, %1$s</string>
     <string name="aichat">AiChat</string>
+    <string name="meals">Meals</string>
     <string name="logs">Logs</string>
     <string name="profile_tab">Profile</string>
 
