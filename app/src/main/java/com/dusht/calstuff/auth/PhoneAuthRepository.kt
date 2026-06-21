@@ -1,6 +1,7 @@
 package com.dusht.calstuff.auth
 
 import android.app.Activity
+import com.dusht.core.logging.AppLogger
 import com.dusht.calstuff.BuildConfig
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
@@ -32,10 +33,12 @@ class PhoneAuthRepository @Inject constructor() {
         }
 
         if (BuildConfig.IS_STAGING && digits == STAGING_TEST_PHONE_DIGITS) {
+            AppLogger.firebase(message = "phoneAuth staging mock — skip Firebase verifyPhoneNumber")
             return Result.success(PhoneVerificationStart.SmsCodeRequired(STAGING_MOCK_VERIFICATION_ID))
         }
 
         val e164 = digitsToE164(digits)
+        AppLogger.firebase(message = "phoneAuth verifyPhoneNumber", extras = mapOf("e164Tail" to e164.takeLast(4)))
         return suspendCancellableCoroutine { cont ->
             val resumed = AtomicBoolean(false)
             fun resumeOnce(value: Result<PhoneVerificationStart>) {
@@ -83,6 +86,7 @@ class PhoneAuthRepository @Inject constructor() {
     suspend fun submitSmsCode(verificationId: String, smsCode: String): Result<Unit> {
         val code = smsCode.trim()
         if (BuildConfig.IS_STAGING && verificationId == STAGING_MOCK_VERIFICATION_ID) {
+            AppLogger.firebase(message = "phoneAuth staging mock OTP — no FirebaseAuth sign-in")
             return if (code == STAGING_TEST_OTP) {
                 Result.success(Unit)
             } else {
@@ -91,9 +95,16 @@ class PhoneAuthRepository @Inject constructor() {
         }
 
         val credential = PhoneAuthProvider.getCredential(verificationId, code)
+        AppLogger.firebase(message = "phoneAuth signInWithCredential start")
         return runCatching {
             auth.signInWithCredential(credential).await()
+            AppLogger.firebase(
+                message = "phoneAuth signInWithCredential success",
+                extras = mapOf("uid" to (auth.currentUser?.uid ?: "")),
+            )
             Unit
+        }.onFailure { e ->
+            AppLogger.firebase(message = "phoneAuth signInWithCredential failed", throwable = e)
         }
     }
 

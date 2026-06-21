@@ -2,6 +2,7 @@ package com.dusht.calstuff.navigation
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.compositionLocalOf
+import com.dusht.core.logging.AppLogger
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
 import androidx.navigation.NavOptionsBuilder
@@ -14,8 +15,9 @@ class AppNavController(private val navController: NavHostController) {
     fun navigateToBottomDestination(destination: BottomNavDestination) {
         val route: AppRoute = when (destination) {
             BottomNavDestination.HOME -> AppRoute.Home
-            BottomNavDestination.AICHAT -> AppRoute.Search
+            BottomNavDestination.MEALS -> AppRoute.Meals
             BottomNavDestination.LOGS -> AppRoute.Profile
+            BottomNavDestination.PROFILE -> AppRoute.ProfileTab
         }
 
         navController.navigate(route) {
@@ -36,8 +38,16 @@ class AppNavController(private val navController: NavHostController) {
     }
 
     fun navigateAndClearBackStack(route: AppRoute) {
+        AppLogger.navigation(
+            message = "navigateAndClearBackStack",
+            extras = mapOf(
+                "to" to route.toString(),
+                "graphId" to navController.graph.id,
+            ),
+        )
         navController.navigate(route) {
-            popUpTo(0) {
+            // popUpTo(0) is invalid — clears nothing; use graph root so stack actually resets.
+            popUpTo(navController.graph.id) {
                 inclusive = true
             }
             launchSingleTop = true
