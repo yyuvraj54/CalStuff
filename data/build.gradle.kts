@@ -55,6 +55,17 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
 
+    // Firebase (BOM aligns versions; Firestore for user data, Auth for current UID)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.firestore)
+    implementation(libs.google.firebase.auth)
+    implementation(libs.kotlinx.coroutines.play.services)
+
+    // Room (local cache — single source of truth for the UI)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    kapt(libs.room.compiler)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

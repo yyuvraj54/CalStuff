@@ -20,7 +20,7 @@ sealed interface AppRoute {
     data object Home : AppRoute
 
     @Serializable
-    data object Search : AppRoute
+    data object Meals : AppRoute
 
     @Serializable
     data object Profile : AppRoute
@@ -30,6 +30,9 @@ sealed interface AppRoute {
 
     @Serializable
     data object ProfileTab : AppRoute
+
+    @Serializable
+    data class AddMeal(val dayOfMonth: Int = 0) : AppRoute
 
     @Serializable
     data object Settings : AppRoute
@@ -47,9 +50,9 @@ enum class BottomNavDestination(
         selectedIcon = R.drawable.home_icon,
         unselectedIcon = R.drawable.home_icon
     ),
-    AICHAT(
-        titleRes = R.string.aichat,
-        route = AppRoute.Search::class,
+    MEALS(
+        titleRes = R.string.meals,
+        route = AppRoute.Meals::class,
         selectedIcon = R.drawable.aichat_icon,
         unselectedIcon = R.drawable.aichat_icon
     ),

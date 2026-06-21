@@ -15,7 +15,7 @@ class AppNavController(private val navController: NavHostController) {
     fun navigateToBottomDestination(destination: BottomNavDestination) {
         val route: AppRoute = when (destination) {
             BottomNavDestination.HOME -> AppRoute.Home
-            BottomNavDestination.AICHAT -> AppRoute.Search
+            BottomNavDestination.MEALS -> AppRoute.Meals
             BottomNavDestination.LOGS -> AppRoute.Profile
             BottomNavDestination.PROFILE -> AppRoute.ProfileTab
         }

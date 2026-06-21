@@ -3,7 +3,7 @@ package com.dusht.calstuff.vm
 import androidx.lifecycle.ViewModel
 import com.dusht.core.logging.AppLogger
 import com.dusht.shared.session.DisplayNameStore
-import com.dusht.shared.profile.UserProfileRepository
+import com.dusht.shared.repository.UserProfileRepository
 import com.dusht.shared.session.UserSessionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -34,8 +34,9 @@ class MainViewModel @Inject constructor(
     /** If the user reinstalled the app, local onboarding flag may be false while Firestore has a full profile. */
     suspend fun syncOnboardingFromFirestoreIfLoggedIn() {
         if (!userSessionRepository.isLoggedIn()) return
-        val profile = userProfileRepository.loadProfile()
-        if (profile?.isComplete() == true) {
+        val profile = userProfileRepository.getProfile()
+        if (profile != null && profile.name.isNotBlank()) {
+            displayNameStore.set(profile.name.trim())
             userSessionRepository.setOnboardingCompleted(true)
         }
     }
