@@ -11,17 +11,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dusht.calstuff.ui.theme.FontSize
+import com.dusht.calstuff.ui.theme.calStuffColors
 import java.util.Calendar
 
 @Composable
@@ -36,10 +37,11 @@ fun CalendarProgressCard(
     onDayClick: ((Int) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    val colors = MaterialTheme.calStuffColors
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Black)
+        colors = CardDefaults.cardColors(containerColor = colors.inverseSurface)
     ) {
         Column(
             modifier = Modifier
@@ -54,7 +56,7 @@ fun CalendarProgressCard(
             ) {
                 Text(
                     text = "Progress Statistics",
-                    color = Color.White.copy(alpha = 0.6f),
+                    color = colors.onInverseSurface.copy(alpha = 0.6f),
                     fontSize = FontSize.smallMedium,
                     fontWeight = FontWeight.Medium
                 )
@@ -66,7 +68,7 @@ fun CalendarProgressCard(
                 }
                 Text(
                     text = monthName,
-                    color = AppYellow,
+                    color = colors.onInverseSurfaceVariant,
                     fontSize = FontSize.medium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -80,7 +82,7 @@ fun CalendarProgressCard(
             ) {
                 Text(
                     text = "$percentage%",
-                    color = AppYellow,
+                    color = colors.onInverseSurfaceVariant,
                     fontSize = FontSize.display2,
                     fontWeight = FontWeight.Bold,
                     lineHeight = 64.sp
@@ -93,7 +95,7 @@ fun CalendarProgressCard(
                 ) {
                     Text(
                         text = description,
-                        color = Color.White.copy(alpha = 0.5f),
+                        color = colors.onInverseSurface.copy(alpha = 0.5f),
                         fontSize = FontSize.smallMedium,
                         fontWeight = FontWeight.Normal,
                         lineHeight = 16.sp

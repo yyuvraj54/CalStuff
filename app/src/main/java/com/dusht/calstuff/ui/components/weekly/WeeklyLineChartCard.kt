@@ -1,5 +1,6 @@
 package com.dusht.calstuff.ui.components.weekly
 
+import com.dusht.calstuff.ui.components.common.EmptyState
 import com.dusht.calstuff.ui.model.WeeklyProgressConfig
 
 import androidx.compose.animation.core.Animatable
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,10 +39,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dusht.calstuff.ui.theme.FontSize
+import com.dusht.calstuff.ui.theme.calStuffColors
 
-private val LineLowColor = Color(0xFFFFD643)
-private val LineHighColor = Color(0xFFF85B4E)
-private val DotColor = Color(0xFF222222)
 private val CHART_HEIGHT = 160.dp
 
 @Composable
@@ -66,11 +66,12 @@ fun WeeklyLineChartCard(
     }
 
     val textMeasurer = rememberTextMeasurer()
+    val colors = MaterialTheme.calStuffColors
 
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF9F9F9))
+        colors = CardDefaults.cardColors(containerColor = colors.surfaceVariant)
     ) {
         Column(
             modifier = Modifier
@@ -86,14 +87,14 @@ fun WeeklyLineChartCard(
                 Column {
                     Text(
                         text = "Weekly Trend",
-                        color = Color(0xFFBBBBBB),
+                        color = colors.textSecondary,
                         fontSize = FontSize.medium,
                         fontWeight = FontWeight.SemiBold
                     )
                     if (!config.isEmpty) {
                         Text(
                             text = "Avg ${config.averageCalories} kcal/day",
-                            color = Color(0xFFCCCCCC),
+                            color = colors.textSecondary,
                             fontSize = FontSize.xSmall,
                             fontWeight = FontWeight.Normal
                         )
@@ -103,13 +104,13 @@ fun WeeklyLineChartCard(
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
                         text = "Daily Goal",
-                        color = Color(0xFFBBBBBB),
+                        color = colors.textSecondary,
                         fontSize = FontSize.xSmall,
                         fontWeight = FontWeight.Medium
                     )
                     Text(
                         text = "${config.calorieGoal} kcal",
-                        color = Color(0xFF222222),
+                        color = colors.textPrimary,
                         fontSize = FontSize.mediumLarge,
                         fontWeight = FontWeight.Bold
                     )
@@ -125,10 +126,9 @@ fun WeeklyLineChartCard(
                         .height(CHART_HEIGHT),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "No data yet",
-                        color = Color(0xFFBBBBBB),
-                        fontSize = FontSize.medium
+                    EmptyState(
+                        title = "No data yet",
+                        imageSize = 90.dp,
                     )
                 }
             } else {
@@ -145,7 +145,7 @@ fun WeeklyLineChartCard(
                         yLabels.forEach { label ->
                             Text(
                                 text = label.toString(),
-                                color = Color(0xFFBBBBBB),
+                                color = colors.textSecondary,
                                 fontSize = FontSize.xxxSmall,
                                 fontWeight = FontWeight.Medium
                             )
@@ -190,7 +190,7 @@ fun WeeklyLineChartCard(
                             // Higher Y value (lower on screen) = yellow, lower Y (higher on screen) = red
                             fun colorForY(y: Float): Color {
                                 val ratio = 1f - ((y - topPadding) / chartH).coerceIn(0f, 1f)
-                                return lerp(LineLowColor, LineHighColor, ratio)
+                                return lerp(colors.highlight, colors.error, ratio)
                             }
 
                             val strokeW = 3.dp.toPx()
@@ -257,7 +257,7 @@ fun WeeklyLineChartCard(
                                 val pt = points[i]
                                 val day = config.days[i]
                                 val intensity = (day.caloriesConsumed.toFloat() / config.calorieGoal).coerceIn(0f, 1f)
-                                val dotColor = lerp(LineLowColor, LineHighColor, intensity)
+                                val dotColor = lerp(colors.highlight, colors.error, intensity)
 
                                 // Outer dot
                                 drawCircle(
@@ -267,7 +267,7 @@ fun WeeklyLineChartCard(
                                 )
                                 // Inner dot
                                 drawCircle(
-                                    color = Color.White,
+                                    color = colors.surfaceVariant,
                                     radius = 3.dp.toPx(),
                                     center = pt
                                 )
@@ -280,7 +280,7 @@ fun WeeklyLineChartCard(
                                         style = TextStyle(
                                             fontSize = 9.sp,
                                             fontWeight = FontWeight.SemiBold,
-                                            color = Color(0xFF888888)
+                                            color = colors.textSecondary
                                         )
                                     )
                                     val tx = (pt.x - textLayout.size.width / 2f)
@@ -298,7 +298,7 @@ fun WeeklyLineChartCard(
                             while (dx < w) {
                                 val endX = (dx + dashWidth).coerceAtMost(w)
                                 drawLine(
-                                    color = Color(0xFFDDDDDD),
+                                    color = colors.divider,
                                     start = Offset(dx, goalY),
                                     end = Offset(endX, goalY),
                                     strokeWidth = 1.dp.toPx()
@@ -322,13 +322,13 @@ fun WeeklyLineChartCard(
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
                                     text = day.dayName,
-                                    color = Color(0xFF888888),
+                                    color = colors.textSecondary,
                                     fontSize = FontSize.xxSmall,
                                     fontWeight = FontWeight.Medium
                                 )
                                 Text(
                                     text = day.date,
-                                    color = Color(0xFFBBBBBB),
+                                    color = colors.textSecondary,
                                     fontSize = FontSize.xxxSmall,
                                     fontWeight = FontWeight.Normal
                                 )

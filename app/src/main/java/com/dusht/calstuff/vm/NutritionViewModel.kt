@@ -20,10 +20,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import javax.inject.Inject
+
+/** Year/month (1-based, matches Firestore's "YYYY-MM-DD" doc keys) currently browsed on the Logs screen. */
+private data class ViewedMonth(val year: Int, val month: Int)
 
 @HiltViewModel
 class NutritionViewModel @Inject constructor(
@@ -38,6 +42,10 @@ class NutritionViewModel @Inject constructor(
 
     private val today: Int get() = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
 
+    // Which month is currently browsed (Logs screen). Defaults to — and for Home/AddMeal
+    // instances always stays on — the current month; edits always target `currentYear`/`currentMonth`.
+    private val viewedMonth = MutableStateFlow(ViewedMonth(currentYear, currentMonth))
+
     // Empty state on start; Room populates it immediately, Firestore syncs in background.
     private val _state = MutableStateFlow(NutritionUiState.empty())
     val state: StateFlow<NutritionUiState> = _state.asStateFlow()
@@ -48,28 +56,50 @@ class NutritionViewModel @Inject constructor(
 
     private fun observeFirestoreData() {
         viewModelScope.launch {
-            combine(
-                nutritionRepository.observeMonthLogs(currentYear, currentMonth),
-                userProfileRepository.observeProfile(),
-                streakRepository.observeStreak(),
-            ) { dayNutritionMap, profile, streak ->
-                val goalFromProfile = profile?.dailyCalorieGoal ?: _state.value.dailyCalorieGoal
-                NutritionUiState(
-                    dailyCalorieGoal = goalFromProfile,
-                    monthLogsData = MonthLogsData(
-                        year = currentYear,
-                        month = currentMonth,
-                        calorieGoal = goalFromProfile,
-                        dayLogs = dayNutritionMap.mapValues { (_, v) -> v.toDayLog() },
-                    ),
-                    bmiConfig = profile?.toBmiConfig() ?: _state.value.bmiConfig,
-                    streakDays = streak.currentStreak,
-                    editableWindowDays = _state.value.editableWindowDays,
-                )
-            }
+            viewedMonth
+                .flatMapLatest { viewed ->
+                    combine(
+                        nutritionRepository.observeMonthLogs(viewed.year, viewed.month),
+                        userProfileRepository.observeProfile(),
+                        streakRepository.observeStreak(),
+                    ) { dayNutritionMap, profile, streak ->
+                        val goalFromProfile = profile?.dailyCalorieGoal ?: _state.value.dailyCalorieGoal
+                        NutritionUiState(
+                            dailyCalorieGoal = goalFromProfile,
+                            monthLogsData = MonthLogsData(
+                                year = viewed.year,
+                                month = viewed.month,
+                                calorieGoal = goalFromProfile,
+                                dayLogs = dayNutritionMap.mapValues { (_, v) -> v.toDayLog() },
+                            ),
+                            bmiConfig = profile?.toBmiConfig() ?: _state.value.bmiConfig,
+                            streakDays = streak.currentStreak,
+                            editableWindowDays = _state.value.editableWindowDays,
+                        )
+                    }
+                }
                 .catch { /* Firestore error: keep existing state to avoid blank screen */ }
                 .collect { _state.value = it }
         }
+    }
+
+    /** Steps the Logs screen's browsed month back one month (Jan rolls back into Dec of the prior year). */
+    fun showPreviousMonth() {
+        viewedMonth.update { viewed ->
+            if (viewed.month == 1) ViewedMonth(viewed.year - 1, 12) else ViewedMonth(viewed.year, viewed.month - 1)
+        }
+    }
+
+    /** Steps the Logs screen's browsed month forward one month (Dec rolls into Jan of the next year). */
+    fun showNextMonth() {
+        viewedMonth.update { viewed ->
+            if (viewed.month == 12) ViewedMonth(viewed.year + 1, 1) else ViewedMonth(viewed.year, viewed.month + 1)
+        }
+    }
+
+    /** Jumps the Logs screen back to today's month. */
+    fun showCurrentMonth() {
+        viewedMonth.value = ViewedMonth(currentYear, currentMonth)
     }
 
     fun canEditDay(day: Int): Boolean {

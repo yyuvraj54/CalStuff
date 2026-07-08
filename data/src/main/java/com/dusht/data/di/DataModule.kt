@@ -15,11 +15,13 @@ import com.dusht.data.nutrition.UserProfileRepositoryImpl
 import com.dusht.data.profile.ProfileGateRepositoryImpl
 import com.dusht.data.session.DisplayNameStoreImpl
 import com.dusht.shared.session.DisplayNameStore
+import com.dusht.data.session.ThemePreferenceRepositoryImpl
 import com.dusht.data.session.UserSessionRepositoryImpl
 import com.dusht.shared.profile.ProfileGateRepository
 import com.dusht.shared.repository.NutritionRepository
 import com.dusht.shared.repository.StreakRepository
 import com.dusht.shared.repository.UserProfileRepository
+import com.dusht.shared.session.ThemePreferenceRepository
 import com.dusht.shared.session.UserSessionRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -55,6 +57,9 @@ abstract class DataBindsModule {
 
     @Binds @Singleton
     abstract fun bindStreakRepository(impl: StreakRepositoryImpl): StreakRepository
+
+    @Binds @Singleton
+    abstract fun bindThemePreferenceRepository(impl: ThemePreferenceRepositoryImpl): ThemePreferenceRepository
 }
 
 @Module

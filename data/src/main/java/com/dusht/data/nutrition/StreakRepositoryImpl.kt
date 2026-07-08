@@ -61,19 +61,24 @@ class StreakRepositoryImpl @Inject constructor(
             lastLoggedDate = todayDate,
         )
 
-        // Write to Room immediately.
+        // Write to Room immediately (unsynced).
         streakDao.upsertStreak(newStreak.toEntity(uid))
 
-        // Push to Firestore in background.
+        // Push to Firestore in background; mark synced once confirmed.
         syncScope.launch {
             runCatching { streakDoc(uid).set(newStreak.toDto()).await() }
+                .onSuccess {
+                    streakDao.upsertStreak(newStreak.toEntity(uid, syncedAt = System.currentTimeMillis()))
+                }
         }
 
         return Result.success(newStreak)
     }
 
     private suspend fun syncStreakFromFirestore(uid: String) {
-        if (streakDao.getStreak(uid) != null) return
+        val local = streakDao.getStreak(uid)
+        // A pending local write (not yet confirmed pushed) wins over a remote pull.
+        if (local != null && local.syncedAt == 0L) return
         runCatching {
             val dto = streakDoc(uid).get().await().toObject(StreakDto::class.java) ?: return
             streakDao.upsertStreak(dto.toDomain().toEntity(uid, syncedAt = System.currentTimeMillis()))

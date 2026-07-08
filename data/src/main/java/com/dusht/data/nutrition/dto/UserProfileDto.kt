@@ -21,6 +21,7 @@ data class UserProfileDto(
     val dailyCalorieGoal: Int = 2000,
     val createdAt: Long = 0L,
     val updatedAt: Long = 0L,
+    val phoneNumber: String = "",
 ) {
     fun toDomain() = UserProfile(
         uid = uid,
@@ -33,6 +34,7 @@ data class UserProfileDto(
         dailyCalorieGoal = dailyCalorieGoal,
         createdAt = createdAt,
         updatedAt = updatedAt,
+        phoneNumber = phoneNumber,
     )
 }
 
@@ -47,4 +49,5 @@ fun UserProfile.toDto() = UserProfileDto(
     dailyCalorieGoal = dailyCalorieGoal,
     createdAt = createdAt,
     updatedAt = updatedAt,
+    phoneNumber = phoneNumber,
 )

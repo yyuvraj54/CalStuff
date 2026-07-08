@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.Flow
  *     meals: List<MealEntryDto>
  *
  * Implementations:
- *  - Android/Firebase: FirestoreNutritionRepositoryImpl (data module)
+ *  - Android/Firebase: NutritionRepositoryImpl (data module) — Room-cached, Firestore-backed.
  *  - Future custom backend: swap binding in DataModule — no ViewModel changes needed.
  */
 interface NutritionRepository {

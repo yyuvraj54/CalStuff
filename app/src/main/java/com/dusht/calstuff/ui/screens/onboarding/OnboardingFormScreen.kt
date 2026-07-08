@@ -6,9 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -30,6 +28,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dusht.calstuff.R
 import com.dusht.calstuff.ui.common.CalAuraOutlinedTextField
 import com.dusht.calstuff.ui.common.onboarding.OnboardingShellLayout
+import com.dusht.calstuff.ui.components.common.LoadingAnimation
 import com.dusht.calstuff.ui.common.onboarding.PrimaryStickyButton
 import com.dusht.calstuff.vm.MainViewModel
 import com.dusht.calstuff.vm.ProfileActivityLevel
@@ -85,7 +84,7 @@ fun OnboardingFormScreen(
                         },
                     )
                     if (state.isSaving) {
-                        CircularProgressIndicator(modifier = Modifier.size(28.dp))
+                        LoadingAnimation(size = 40.dp)
                     }
                 }
             }

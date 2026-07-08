@@ -12,17 +12,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dusht.calstuff.ui.theme.FontSize
+import com.dusht.calstuff.ui.theme.calStuffColors
 import java.util.Calendar
 
 private const val GRID_COLUMNS = 7
@@ -63,10 +64,11 @@ fun CalendarProgressCardCompact(
         cal.getDisplayName(Calendar.MONTH, Calendar.SHORT, java.util.Locale.getDefault()) ?: ""
     }
 
+    val colors = MaterialTheme.calStuffColors
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Black)
+        colors = CardDefaults.cardColors(containerColor = colors.inverseSurface)
     ) {
         BoxWithConstraints(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 16.dp)
@@ -84,13 +86,13 @@ fun CalendarProgressCardCompact(
                 ) {
                     Text(
                         text = "$percentage%",
-                        color = AppYellow,
+                        color = colors.onInverseSurfaceVariant,
                         fontSize = FontSize.xLarge,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = monthName,
-                        color = Color.White.copy(alpha = 0.5f),
+                        color = colors.onInverseSurface.copy(alpha = 0.5f),
                         fontSize = FontSize.xSmall,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -110,7 +112,7 @@ fun CalendarProgressCardCompact(
                         ) {
                             Text(
                                 text = name,
-                                color = Color.White.copy(alpha = 0.35f),
+                                color = colors.onInverseSurface.copy(alpha = 0.35f),
                                 fontSize = FontSize.xxxSmall,
                                 fontWeight = FontWeight.Medium,
                                 textAlign = TextAlign.Center
@@ -179,7 +181,7 @@ fun CalendarProgressCardCompact(
                 Text(
                     text = if (calorieGoal > 0) "$caloriesConsumed / $calorieGoal kcal"
                         else "$percentage% of $monthName",
-                    color = Color.White.copy(alpha = 0.4f),
+                    color = colors.onInverseSurface.copy(alpha = 0.4f),
                     fontSize = FontSize.xxxSmall,
                     fontWeight = FontWeight.Normal
                 )

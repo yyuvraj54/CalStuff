@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,16 +28,19 @@ import androidx.compose.ui.unit.dp
 import com.dusht.calstuff.ui.model.MealLogEntry
 import com.dusht.calstuff.ui.model.MealType
 import com.dusht.calstuff.ui.theme.FontSize
+import com.dusht.calstuff.ui.theme.calStuffColors
+import com.dusht.calstuff.ui.theme.themeColor
 
 @Composable
 fun MealLogCard(
     entry: MealLogEntry,
     modifier: Modifier = Modifier
 ) {
+    val colors = MaterialTheme.calStuffColors
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = colors.surface)
     ) {
         Column(
             modifier = Modifier
@@ -54,19 +58,19 @@ fun MealLogCard(
                         modifier = Modifier
                             .size(10.dp)
                             .clip(CircleShape)
-                            .background(Color(entry.mealType.color))
+                            .background(entry.mealType.themeColor(colors))
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = entry.mealType.label,
-                        color = Color(0xFF999999),
+                        color = colors.textSecondary,
                         fontSize = FontSize.xSmall,
                         fontWeight = FontWeight.Medium
                     )
                 }
                 Text(
                     text = entry.time,
-                    color = Color(0xFFBBBBBB),
+                    color = colors.textSecondary,
                     fontSize = FontSize.xSmall,
                     fontWeight = FontWeight.Normal
                 )
@@ -77,7 +81,7 @@ fun MealLogCard(
             // Food name
             Text(
                 text = entry.name,
-                color = Color.Black,
+                color = colors.textPrimary,
                 fontSize = FontSize.medium,
                 fontWeight = FontWeight.SemiBold
             )
@@ -92,15 +96,15 @@ fun MealLogCard(
             ) {
                 Text(
                     text = "${entry.calories} kcal",
-                    color = Color.Black,
+                    color = colors.textPrimary,
                     fontSize = FontSize.smallMedium,
                     fontWeight = FontWeight.Bold
                 )
 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    MacroPill(label = "P", value = "${entry.protein.toInt()}g", color = Color(0xFFFFD643))
-                    MacroPill(label = "C", value = "${entry.carbs.toInt()}g", color = Color(0xFFF85B4E))
-                    MacroPill(label = "F", value = "${entry.fat.toInt()}g", color = Color(0xFF222222))
+                    MacroPill(label = "P", value = "${entry.protein.toInt()}g", color = colors.highlight)
+                    MacroPill(label = "C", value = "${entry.carbs.toInt()}g", color = colors.error)
+                    MacroPill(label = "F", value = "${entry.fat.toInt()}g", color = colors.textPrimary)
                 }
             }
         }
@@ -129,7 +133,7 @@ private fun MacroPill(
         )
         Text(
             text = value,
-            color = Color.Black.copy(alpha = 0.7f),
+            color = MaterialTheme.calStuffColors.textPrimary.copy(alpha = 0.7f),
             fontSize = FontSize.xxxSmall,
             fontWeight = FontWeight.Medium
         )

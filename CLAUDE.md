@@ -18,6 +18,10 @@ CalStuff is a Kotlin Multiplatform (KMP) project targeting Android (Jetpack Comp
 # Run Android unit tests
 ./gradlew testProdDebugUnitTest
 
+# Run a single test class/method (any module)
+./gradlew :app:testProdDebugUnitTest --tests "com.dusht.calstuff.ExampleUnitTest"
+./gradlew :data:testDebugUnitTest --tests "com.dusht.data.SomeTest.someMethod"
+
 # Build iOS simulator framework from shared module
 ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64
 
@@ -31,8 +35,8 @@ CalStuff is a Kotlin Multiplatform (KMP) project targeting Android (Jetpack Comp
 ## Module structure
 
 - **`:app`** — Compose UI, navigation, feature screens, Hilt ViewModels. Package: `com.dusht.calstuff`
-- **`:shared`** — KMP module (`commonMain`/`androidMain`/`iosMain`). Shared contracts, models, use cases. Produces `CalStuffShared` framework for iOS.
-- **`:data`** — Android-only implementations of `:shared` interfaces. Hilt `@Module`/`@Binds` bindings, OkHttp, Firebase, preferences.
+- **`:shared`** — KMP module (`commonMain`/`androidMain`/`iosMain`). Package: `com.dusht.shared`. Produces `CalStuffShared` framework for iOS. `commonMain` already holds real domain contracts, not just the `expect`/`actual` platform-name stub: `UserSessionRepository`, `DisplayNameStore`, `UserProfileRepository`, `NutritionRepository`, `StreakRepository`, `ProfileGateRepository`, plus their models (`UserProfile`, `NutritionModels`, `StreakData`).
+- **`:data`** — Android-only implementations of the `:shared` interfaces above. Package: `com.dusht.data`. Hilt bindings split across `DataBindsModule` (`@Binds`) and `DataProvidesModule` (`@Provides`) in `data/di/DataModule.kt`. Backed by **Room** (`CalStuffDatabase`, local cache/single source of truth for the UI — see DAOs under `data/local/dao`), **Firestore** + **Firebase Auth** (remote user data), and a shared `OkHttpClient` whose logging interceptor routes through `AppLogger.api` (body logging only when `BuildConfig.DEBUG`).
 - **`:core-logging`** — Timber setup, `AppLogger` facade with tags: API, NAV, LIFECYCLE, APP.
 
 ## Architecture
@@ -46,6 +50,11 @@ Base classes in `com.dusht.calstuff.utils.base`: `BaseViewModel`, `ViewState`, `
 **Navigation**: Type-safe routes via `kotlinx.serialization` in `AppRoute` (sealed interface). `AppNavController` wraps `NavHostController`. Add screens by adding a `@Serializable` route to `AppRoute` and registering in `AppNavGraph`.
 
 **Build flavors**: `staging` (IS_STAGING=true) and `prod` (IS_STAGING=false, default). compileSdk/targetSdk=36, minSdk=24.
+
+**Feature screens** (`app/src/main/java/com/dusht/calstuff/ui/`):
+- `screens/navscreen/{home,meals,logs,profile,chat}` — bottom-nav tab destinations (see `BottomNavDestination` in `AppRoute.kt`).
+- `screens/onboarding`, `screens/addmeal` — non-tab flows pushed on top of the nav graph.
+- `components/{nutrition,streak,calendar,bmi,logs,weekly,widgetgrid}` — reusable widgets composed into the home screen's widget grid; `model/widget` holds their shared data models.
 
 ## KMP conventions
 

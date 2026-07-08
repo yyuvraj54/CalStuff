@@ -19,4 +19,6 @@ data class UserProfile(
     val dailyCalorieGoal: Int,
     val createdAt: Long,
     val updatedAt: Long,
+    /** E.164 number the user signed in with via Firebase Phone Auth. Empty if signed in another way. */
+    val phoneNumber: String = "",
 )

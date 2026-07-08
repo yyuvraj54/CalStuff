@@ -33,6 +33,8 @@ class UserProfileRepositoryImpl @Inject constructor(
 
     override fun currentUserId(): String? = auth.currentUser?.uid
 
+    override fun currentPhoneNumber(): String? = auth.currentUser?.phoneNumber
+
     private fun userDoc(uid: String) = firestore.collection("users").document(uid)
 
     override fun observeProfile(): Flow<UserProfile?> {
@@ -72,25 +74,37 @@ class UserProfileRepositoryImpl @Inject constructor(
         }
         AppLogger.firebase(message = "getProfile start", extras = mapOf("uid" to uid))
         val local = userProfileDao.getProfile(uid)
-        if (local != null) {
+
+        // A pending local write (saved but not yet confirmed pushed) wins over a remote fetch.
+        if (local != null && local.syncedAt == 0L) {
             val domain = local.toDomain()
             cacheDisplayName(domain.name)
-            AppLogger.firebase(message = "getProfile from Room", extras = mapOf("name" to domain.name))
+            AppLogger.firebase(message = "getProfile from Room (pending sync)", extras = mapOf("name" to domain.name))
             return domain
         }
-        return runCatching {
-            val remote = userDoc(uid).get().await().toObject(UserProfileDto::class.java)
-                ?: return null
+
+        val remote = runCatching {
+            userDoc(uid).get().await().toObject(UserProfileDto::class.java)
+        }.getOrNull()
+
+        if (remote != null) {
             val domain = remote.toDomain()
             userProfileDao.upsertProfile(domain.toEntity(syncedAt = System.currentTimeMillis()))
             cacheDisplayName(domain.name)
             AppLogger.firebase(message = "getProfile from Firestore", extras = mapOf("name" to domain.name))
-            domain
-        }.getOrNull().also { profile ->
-            if (profile == null) {
-                AppLogger.firebase(message = "getProfile — no profile found")
-            }
+            return domain
         }
+
+        // Offline, or Firestore has no doc yet — fall back to whatever Room has.
+        if (local != null) {
+            val domain = local.toDomain()
+            cacheDisplayName(domain.name)
+            AppLogger.firebase(message = "getProfile from Room (offline fallback)", extras = mapOf("name" to domain.name))
+            return domain
+        }
+
+        AppLogger.firebase(message = "getProfile — no profile found")
+        return null
     }
 
     private fun cacheDisplayName(name: String) {
@@ -99,8 +113,9 @@ class UserProfileRepositoryImpl @Inject constructor(
     }
 
     private suspend fun syncProfileFromFirestore(uid: String) {
-        // Skip if already cached locally.
-        if (userProfileDao.getProfile(uid) != null) return
+        val local = userProfileDao.getProfile(uid)
+        // A pending local write (not yet confirmed pushed) wins over a remote pull.
+        if (local != null && local.syncedAt == 0L) return
         runCatching {
             val remote = userDoc(uid).get().await().toObject(UserProfileDto::class.java) ?: return
             userProfileDao.upsertProfile(remote.toDomain().toEntity(syncedAt = System.currentTimeMillis()))

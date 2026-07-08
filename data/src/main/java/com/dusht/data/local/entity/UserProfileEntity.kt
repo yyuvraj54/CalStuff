@@ -18,6 +18,7 @@ data class UserProfileEntity(
     val updatedAt: Long,
     /** Epoch-ms of the last Firestore pull. 0 = never synced. */
     val syncedAt: Long = 0L,
+    val phoneNumber: String = "",
 ) {
     fun toDomain() = UserProfile(
         uid = uid, name = name, age = age,
@@ -25,6 +26,7 @@ data class UserProfileEntity(
         gender = gender, activityLevel = activityLevel,
         dailyCalorieGoal = dailyCalorieGoal,
         createdAt = createdAt, updatedAt = updatedAt,
+        phoneNumber = phoneNumber,
     )
 }
 
@@ -35,4 +37,5 @@ fun UserProfile.toEntity(syncedAt: Long = 0L) = UserProfileEntity(
     dailyCalorieGoal = dailyCalorieGoal,
     createdAt = createdAt, updatedAt = updatedAt,
     syncedAt = syncedAt,
+    phoneNumber = phoneNumber,
 )

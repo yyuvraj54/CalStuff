@@ -6,17 +6,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -25,6 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dusht.calstuff.ui.theme.FontSize
+import com.dusht.calstuff.ui.theme.calStuffColors
 
 @Composable
 fun DailyProgressCard(
@@ -32,24 +34,27 @@ fun DailyProgressCard(
     dailyCalorieGoal: Int,
     modifier: Modifier = Modifier
 ) {
+    val colors = MaterialTheme.calStuffColors
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = colors.surface)
     ) {
         Column(
             modifier = Modifier
+                .fillMaxWidth()
                 .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Header: Calories (left) + Daily Goal (right)
             Row(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Top
             ) {
                 Text(
                     text = "Calories",
-                    color = Color(0xFFBBBBBB),
+                    color = colors.textSecondary,
                     fontSize = FontSize.medium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -59,16 +64,16 @@ fun DailyProgressCard(
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
                         text = "Daily Goal",
-                        color = Color(0xFF999999),
+                        color = colors.textSecondary,
                         fontSize = FontSize.xSmall,
                         fontWeight = FontWeight.Medium
                     )
                     Text(
                         text = buildAnnotatedString {
-                            withStyle(SpanStyle(color = Color.Black, fontWeight = FontWeight.Bold)) {
+                            withStyle(SpanStyle(color = colors.textPrimary, fontWeight = FontWeight.Bold)) {
                                 append("$dailyCalorieGoal")
                             }
-                            withStyle(SpanStyle(color = Color(0xFF999999), fontWeight = FontWeight.Normal)) {
+                            withStyle(SpanStyle(color = colors.textSecondary, fontWeight = FontWeight.Normal)) {
                                 append(" kcal")
                             }
                         },
@@ -95,17 +100,17 @@ fun DailyProgressCard(
                 NutrientIndicator(
                     label = "Protein",
                     value = "${config.proteinConsumed.toInt()}g",
-                    color = ProteinColor
+                    color = colors.proteinColor
                 )
                 NutrientIndicator(
                     label = "Carbs",
                     value = "${config.carbsConsumed.toInt()}g",
-                    color = CarbsColor
+                    color = colors.carbsColor
                 )
                 NutrientIndicator(
                     label = "Fat",
                     value = "${config.fatConsumed.toInt()}g",
-                    color = FatColor
+                    color = colors.fatColor
                 )
             }
         }

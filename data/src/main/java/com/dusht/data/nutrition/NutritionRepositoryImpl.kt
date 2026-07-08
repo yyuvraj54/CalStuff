@@ -10,6 +10,7 @@ import com.dusht.shared.model.DayNutrition
 import com.dusht.shared.model.MealEntry
 import com.dusht.shared.repository.NutritionRepository
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -147,9 +148,11 @@ class NutritionRepositoryImpl @Inject constructor(
         try {
             val start = "%04d-%02d-01".format(year, month)
             val end = "%04d-%02d-31".format(year, month)
+            // "date" is @DocumentId on DayLogDto, so it's excluded from the stored document body —
+            // querying the field name directly would never match anything. Query the doc ID instead.
             val snapshot = nutritionCol(uid)
-                .whereGreaterThanOrEqualTo("date", start)
-                .whereLessThanOrEqualTo("date", end)
+                .whereGreaterThanOrEqualTo(FieldPath.documentId(), start)
+                .whereLessThanOrEqualTo(FieldPath.documentId(), end)
                 .get().await()
 
             val now = System.currentTimeMillis()

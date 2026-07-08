@@ -35,6 +35,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -56,9 +57,12 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dusht.calstuff.ui.components.common.EmptyState
 import com.dusht.calstuff.ui.model.MealLogEntry
 import com.dusht.calstuff.ui.model.MealType
 import com.dusht.calstuff.ui.theme.FontSize
+import com.dusht.calstuff.ui.theme.calStuffColors
+import com.dusht.calstuff.ui.theme.themeColor
 import com.dusht.calstuff.vm.NutritionViewModel
 import java.util.Calendar
 import java.util.Locale
@@ -79,6 +83,7 @@ fun MealsScreen(
     val meals = dayLog?.meals ?: emptyList()
 
     var editingMealId by remember { mutableStateOf<String?>(null) }
+    val colors = MaterialTheme.calStuffColors
 
     Column(
         modifier = modifier
@@ -98,7 +103,7 @@ fun MealsScreen(
         }
         Text(
             text = headerLabel,
-            color = Color.Black,
+            color = colors.textPrimary,
             fontSize = FontSize.xLarge,
             fontWeight = FontWeight.Bold
         )
@@ -109,10 +114,10 @@ fun MealsScreen(
         if (dayLog != null) {
             Text(
                 text = buildAnnotatedString {
-                    withStyle(SpanStyle(color = Color.Black, fontWeight = FontWeight.SemiBold)) {
+                    withStyle(SpanStyle(color = colors.textPrimary, fontWeight = FontWeight.SemiBold)) {
                         append("${dayLog.totalCalories}")
                     }
-                    withStyle(SpanStyle(color = Color(0xFF999999))) {
+                    withStyle(SpanStyle(color = colors.textSecondary)) {
                         append(" / ${state.dailyCalorieGoal} kcal")
                     }
                 },
@@ -144,8 +149,8 @@ fun MealsScreen(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(20.dp))
-                            .background(if (isChipSelected) Color(0xFF222222) else Color.White)
-                            .then(if (!isChipSelected) Modifier.border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(20.dp)) else Modifier)
+                            .background(if (isChipSelected) colors.inverseSurface else colors.surface)
+                            .then(if (!isChipSelected) Modifier.border(1.dp, colors.divider, RoundedCornerShape(20.dp)) else Modifier)
                             .clickable {
                                 selectedDay = day
                                 editingMealId = null
@@ -156,7 +161,7 @@ fun MealsScreen(
                             text = chipLabel,
                             fontSize = FontSize.small,
                             fontWeight = FontWeight.Medium,
-                            color = if (isChipSelected) Color.White else Color(0xFF666666)
+                            color = if (isChipSelected) colors.onInverseSurface else colors.textSecondary
                         )
                     }
                 }
@@ -169,29 +174,15 @@ fun MealsScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White)
+                colors = CardDefaults.cardColors(containerColor = colors.surface)
             ) {
-                Column(
+                EmptyState(
+                    title = "No meals logged",
+                    subtitle = if (isEditable) "Tap + to add your first meal" else "No meals logged for this day",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(32.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = if (isEditable) "No meals logged" else "No meals logged for this day",
-                        color = Color(0xFFBBBBBB),
-                        fontSize = FontSize.medium,
-                        fontWeight = FontWeight.Medium
-                    )
-                    if (isEditable) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Tap + to add your first meal",
-                            color = Color(0xFFDDDDDD),
-                            fontSize = FontSize.small
-                        )
-                    }
-                }
+                        .padding(16.dp),
+                )
             }
         } else {
             // Meal cards grouped by type
@@ -209,12 +200,12 @@ fun MealsScreen(
                         modifier = Modifier
                             .size(8.dp)
                             .clip(CircleShape)
-                            .background(Color(mealType.color))
+                            .background(mealType.themeColor(colors))
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = mealType.label,
-                        color = Color(0xFF666666),
+                        color = colors.textSecondary,
                         fontSize = FontSize.smallMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -257,10 +248,11 @@ private fun EditableMealCard(
     onSaveEdit: (MealLogEntry) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = MaterialTheme.calStuffColors
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = colors.surface)
     ) {
         Column(
             modifier = Modifier
@@ -275,13 +267,13 @@ private fun EditableMealCard(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = meal.name,
-                        color = Color.Black,
+                        color = colors.textPrimary,
                         fontSize = FontSize.medium,
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
                         text = meal.time,
-                        color = Color(0xFFBBBBBB),
+                        color = colors.textSecondary,
                         fontSize = FontSize.xSmall
                     )
                 }
@@ -291,7 +283,7 @@ private fun EditableMealCard(
                             Icon(
                                 Icons.Default.Edit,
                                 contentDescription = "Edit",
-                                tint = if (isEditing) Color(0xFFFFD643) else Color(0xFFBBBBBB),
+                                tint = if (isEditing) colors.highlight else colors.textSecondary,
                                 modifier = Modifier.size(18.dp)
                             )
                         }
@@ -299,7 +291,7 @@ private fun EditableMealCard(
                             Icon(
                                 Icons.Default.Delete,
                                 contentDescription = "Delete",
-                                tint = Color(0xFFF85B4E),
+                                tint = colors.error,
                                 modifier = Modifier.size(18.dp)
                             )
                         }
@@ -316,14 +308,14 @@ private fun EditableMealCard(
             ) {
                 Text(
                     text = "${meal.calories} kcal",
-                    color = Color.Black,
+                    color = colors.textPrimary,
                     fontSize = FontSize.smallMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    MacroPill("P", "${meal.protein.toInt()}g", Color(0xFFFFD643))
-                    MacroPill("C", "${meal.carbs.toInt()}g", Color(0xFFF85B4E))
-                    MacroPill("F", "${meal.fat.toInt()}g", Color(0xFF222222))
+                    MacroPill("P", "${meal.protein.toInt()}g", colors.highlight)
+                    MacroPill("C", "${meal.carbs.toInt()}g", colors.error)
+                    MacroPill("F", "${meal.fat.toInt()}g", colors.textPrimary)
                 }
             }
 
@@ -348,6 +340,7 @@ private fun InlineEditForm(
     var protein by remember(meal.id) { mutableStateOf(meal.protein.toInt().toString()) }
     var carbs by remember(meal.id) { mutableStateOf(meal.carbs.toInt().toString()) }
     var fat by remember(meal.id) { mutableStateOf(meal.fat.toInt().toString()) }
+    val colors = MaterialTheme.calStuffColors
 
     Column(
         modifier = Modifier
@@ -380,9 +373,9 @@ private fun InlineEditForm(
             },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD643))
+            colors = ButtonDefaults.buttonColors(containerColor = colors.highlight)
         ) {
-            Text("Save", color = Color.Black, fontWeight = FontWeight.SemiBold)
+            Text("Save", color = colors.onHighlight, fontWeight = FontWeight.SemiBold)
         }
     }
 }
@@ -395,6 +388,7 @@ private fun EditField(
     modifier: Modifier = Modifier,
     onValueChange: (String) -> Unit
 ) {
+    val colors = MaterialTheme.calStuffColors
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
@@ -404,9 +398,9 @@ private fun EditField(
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         shape = RoundedCornerShape(10.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = Color(0xFFFFD643),
-            unfocusedBorderColor = Color(0xFFE0E0E0),
-            cursorColor = Color(0xFFFFD643)
+            focusedBorderColor = colors.highlight,
+            unfocusedBorderColor = colors.divider,
+            cursorColor = colors.highlight
         )
     )
 }
@@ -421,6 +415,6 @@ private fun MacroPill(label: String, value: String, color: Color) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text("$label ", color = color, fontSize = FontSize.xxxSmall, fontWeight = FontWeight.Bold)
-        Text(value, color = Color.Black.copy(alpha = 0.7f), fontSize = FontSize.xxxSmall, fontWeight = FontWeight.Medium)
+        Text(value, color = MaterialTheme.calStuffColors.textPrimary.copy(alpha = 0.7f), fontSize = FontSize.xxxSmall, fontWeight = FontWeight.Medium)
     }
 }

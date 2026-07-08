@@ -61,11 +61,5 @@ enum class BottomNavDestination(
         route = AppRoute.Profile::class,
         selectedIcon = R.drawable.logs_icon,
         unselectedIcon = R.drawable.logs_icon
-    ),
-    PROFILE(
-        titleRes = R.string.profile_tab,
-        route = AppRoute.ProfileTab::class,
-        selectedIcon = R.drawable.profile_icon,
-        unselectedIcon = R.drawable.profile_icon
     )
 }

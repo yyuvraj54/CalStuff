@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.dusht.calstuff.ui.theme.calStuffColors
 
 /**
  * Horizontal rule with centered label (e.g. "Or") for auth and onboarding splits.
@@ -20,7 +21,7 @@ import androidx.compose.ui.unit.dp
 fun CalOrDivider(
     text: String,
     modifier: Modifier = Modifier,
-    lineColor: Color = Color(0xFFE0E4EB),
+    lineColor: Color = MaterialTheme.calStuffColors.divider,
 ) {
     Row(
         modifier = modifier

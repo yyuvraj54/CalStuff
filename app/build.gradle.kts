@@ -104,6 +104,7 @@ dependencies {
     // Coil (Image Loading)
     implementation("io.coil-kt.coil3:coil-compose:3.3.0")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.3.0")
+    implementation("io.coil-kt.coil3:coil-gif:3.3.0")
 
     // Lottie animations
     implementation(libs.lottie.compose)

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dusht.calstuff.ui.theme.FontSize
+import com.dusht.calstuff.ui.theme.calStuffColors
 
 @Composable
 fun NutrientIndicator(
@@ -26,6 +28,7 @@ fun NutrientIndicator(
     color: Color,
     modifier: Modifier = Modifier
 ) {
+    val colors = MaterialTheme.calStuffColors
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -33,7 +36,7 @@ fun NutrientIndicator(
     ) {
         Text(
             text = value,
-            color = Color(0xFF555555),
+            color = colors.textPrimary,
             fontSize = FontSize.small,
             fontWeight = FontWeight.SemiBold
         )
@@ -49,7 +52,7 @@ fun NutrientIndicator(
             )
             Text(
                 text = label,
-                color = Color(0xFF888888),
+                color = colors.textSecondary,
                 fontSize = FontSize.xxSmall,
                 fontWeight = FontWeight.Medium
             )
@@ -63,6 +66,6 @@ private fun PreviewNutrientIndicator() {
     NutrientIndicator(
         label = "Protein",
         value = "118g",
-        color = ProteinColor
+        color = MaterialTheme.calStuffColors.proteinColor
     )
 }

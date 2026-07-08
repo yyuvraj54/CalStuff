@@ -13,9 +13,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.dusht.calstuff.ui.theme.calStuffColors
 
 /**
  * App-wide outlined text field: soft surface, rounded corners, light borders.
@@ -35,13 +35,14 @@ fun CalAuraOutlinedTextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
+    val calStuffColors = MaterialTheme.calStuffColors
     val shape = RoundedCornerShape(16.dp)
     val colors = OutlinedTextFieldDefaults.colors(
-        focusedContainerColor = CalAuraFieldColors.container,
-        unfocusedContainerColor = CalAuraFieldColors.container,
-        disabledContainerColor = CalAuraFieldColors.container.copy(alpha = 0.6f),
-        focusedBorderColor = CalAuraFieldColors.borderFocused,
-        unfocusedBorderColor = CalAuraFieldColors.border,
+        focusedContainerColor = calStuffColors.surfaceVariant,
+        unfocusedContainerColor = calStuffColors.surfaceVariant,
+        disabledContainerColor = calStuffColors.surfaceVariant.copy(alpha = 0.6f),
+        focusedBorderColor = calStuffColors.accent,
+        unfocusedBorderColor = calStuffColors.divider,
         cursorColor = MaterialTheme.colorScheme.primary,
         focusedLabelColor = MaterialTheme.colorScheme.primary,
         unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -66,8 +67,3 @@ fun CalAuraOutlinedTextField(
     )
 }
 
-private object CalAuraFieldColors {
-    val container = Color(0xFFF5F7FA)
-    val border = Color(0xFFE0E4EB)
-    val borderFocused = Color(0xFFB8C4D9)
-}

@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.Flow
  *     updatedAt: Long           epoch-ms
  *
  * Implementations:
- *  - Android/Firebase: FirestoreStreakRepositoryImpl (data module)
+ *  - Android/Firebase: StreakRepositoryImpl (data module) — Room-cached, Firestore-backed.
  *  - Future custom backend: swap binding in DataModule — no ViewModel changes needed.
  */
 interface StreakRepository {

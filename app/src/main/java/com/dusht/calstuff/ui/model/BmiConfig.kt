@@ -43,11 +43,11 @@ data class BmiConfig(
     }
 }
 
-enum class BmiCategory(val label: String, val colorHex: Long) {
-    UNDERWEIGHT("Underweight", 0xFF42A5F5),
-    NORMAL("Normal", 0xFF66BB6A),
-    OVERWEIGHT("Overweight", 0xFFFFD643),
-    OBESE("Obese", 0xFFF85B4E);
+enum class BmiCategory(val label: String) {
+    UNDERWEIGHT("Underweight"),
+    NORMAL("Normal"),
+    OVERWEIGHT("Overweight"),
+    OBESE("Obese");
 
     fun meaning(gender: Gender): String = when (this) {
         UNDERWEIGHT -> "You may need to gain some weight"

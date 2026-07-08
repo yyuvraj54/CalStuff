@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,13 +33,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.dusht.calstuff.ui.theme.CalStuffColors
 import com.dusht.calstuff.ui.theme.FontSize
+import com.dusht.calstuff.ui.theme.calStuffColors
 import kotlin.math.cos
 import kotlin.math.sin
 
-val ProteinColor = Color(0xFFFFD643)
-val CarbsColor = Color(0xFFF85B4E)
-val FatColor = Color(0xFF222222)
+/** Macro-nutrient ring colors. Fat is deliberately theme-stable (not [CalStuffColors.textPrimary])
+ * since the ring/bubble pairs it with a fixed contrasting text color — see usages below. */
+val CalStuffColors.proteinColor: Color get() = highlight
+val CalStuffColors.carbsColor: Color get() = error
+val CalStuffColors.fatColor: Color get() = inverseSurface
 
 private const val GAP_DEGREES = 8f
 private const val START_ANGLE = -90f
@@ -51,6 +56,7 @@ fun NutritionRing(
     ringThickness: Dp = 30.dp,
     cornerRadius: Dp = 8.dp
 ) {
+    val colors = MaterialTheme.calStuffColors
     val total = config.proteinConsumed + config.carbsConsumed + config.fatConsumed
     val hasData = total > 0f
 
@@ -119,17 +125,17 @@ fun NutritionRing(
             val c = Offset(size.width / 2f, size.height / 2f)
 
             if (!hasData) {
-                drawRoundedSegment(c, innerR, outerR, 0f, 360f, cr, Color(0xFFE0E0E0))
+                drawRoundedSegment(c, innerR, outerR, 0f, 360f, cr, colors.divider)
                 return@Canvas
             }
 
             // Full ring in widget background color so gaps blend in
-            drawRoundedSegment(c, innerR, outerR, 0f, 360f, cr, Color.White)
+            drawRoundedSegment(c, innerR, outerR, 0f, 360f, cr, colors.surface)
 
             val animatedSweeps = listOf(
-                (proteinSweep * proteinAnim.value) to ProteinColor,
-                (carbsSweep * carbsAnim.value) to CarbsColor,
-                (fatSweep * fatAnim.value) to FatColor
+                (proteinSweep * proteinAnim.value) to colors.proteinColor,
+                (carbsSweep * carbsAnim.value) to colors.carbsColor,
+                (fatSweep * fatAnim.value) to colors.fatColor
             )
 
             var currentAngle = START_ANGLE
@@ -141,8 +147,8 @@ fun NutritionRing(
                 }
                 // Advance by full target sweep (not animated) so positions stay correct
                 currentAngle += when (color) {
-                    ProteinColor -> proteinSweep
-                    CarbsColor -> carbsSweep
+                    colors.proteinColor -> proteinSweep
+                    colors.carbsColor -> carbsSweep
                     else -> fatSweep
                 } + GAP_DEGREES
             }
@@ -167,9 +173,9 @@ fun NutritionRing(
 
             var angle = START_ANGLE
             val bubbles = listOf(
-                BubbleData(proteinSweep, angle, ProteinColor, (config.proteinPercent * 100).toInt(), proteinAnim).also { angle += proteinSweep + GAP_DEGREES },
-                BubbleData(carbsSweep, angle, CarbsColor, (config.carbsPercent * 100).toInt(), carbsAnim).also { angle += carbsSweep + GAP_DEGREES },
-                BubbleData(fatSweep, angle, FatColor, (config.fatPercent * 100).toInt(), fatAnim)
+                BubbleData(proteinSweep, angle, colors.proteinColor, (config.proteinPercent * 100).toInt(), proteinAnim).also { angle += proteinSweep + GAP_DEGREES },
+                BubbleData(carbsSweep, angle, colors.carbsColor, (config.carbsPercent * 100).toInt(), carbsAnim).also { angle += carbsSweep + GAP_DEGREES },
+                BubbleData(fatSweep, angle, colors.fatColor, (config.fatPercent * 100).toInt(), fatAnim)
             )
 
             bubbles.forEach { bubble ->
@@ -195,7 +201,7 @@ fun NutritionRing(
                     ) {
                         Text(
                             text = "${bubble.percent}%",
-                            color = if (bubble.color == FatColor) Color.White else Color.Black,
+                            color = if (bubble.color == colors.fatColor) colors.onInverseSurface else colors.inverseSurface,
                             fontSize = FontSize.xSmall,
                             fontWeight = FontWeight.Bold
                         )
@@ -217,14 +223,14 @@ fun NutritionRing(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = animatedKcal.toString(),
-                color = Color.Black,
+                color = colors.textPrimary,
                 fontSize = FontSize.heading,
                 fontWeight = FontWeight.Bold,
                 lineHeight = 28.sp
             )
             Text(
                 text = "/kcal",
-                color = Color.Gray,
+                color = colors.textSecondary,
                 fontSize = FontSize.small,
                 fontWeight = FontWeight.Normal
             )

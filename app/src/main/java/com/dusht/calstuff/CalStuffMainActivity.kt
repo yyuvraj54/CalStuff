@@ -10,6 +10,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,8 +24,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -37,7 +38,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
@@ -47,15 +47,20 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.dusht.calstuff.navigation.AppNavController
 import com.dusht.calstuff.navigation.AppNavGraph
 import com.dusht.calstuff.navigation.BottomNavDestination
 import com.dusht.calstuff.navigation.LocalAppNavController
+import com.dusht.calstuff.ui.components.common.LoadingAnimation
 import com.dusht.calstuff.ui.theme.CalStuffTheme
+import com.dusht.calstuff.ui.theme.calStuffColors
 import com.dusht.calstuff.vm.MainViewModel
+import com.dusht.calstuff.vm.ThemeViewModel
 import com.dusht.core.logging.AppLogger
+import com.dusht.shared.session.ThemeMode
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -72,7 +77,14 @@ class CalStuffMainActivity : ComponentActivity() {
         )
         enableEdgeToEdge()
         setContent {
-            CalStuffTheme {
+            val themeViewModel: ThemeViewModel = hiltViewModel()
+            val themeMode by themeViewModel.themeMode.collectAsStateWithLifecycle()
+            val darkTheme = when (themeMode) {
+                ThemeMode.LIGHT -> false
+                ThemeMode.DARK -> true
+                ThemeMode.SYSTEM -> isSystemInDarkTheme()
+            }
+            CalStuffTheme(darkTheme = darkTheme) {
                 CalStuffApp()
             }
         }
@@ -112,7 +124,7 @@ fun CalStuffApp(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) {
-            CircularProgressIndicator()
+            LoadingAnimation()
         }
         return
     }
@@ -185,14 +197,15 @@ fun MainBottomNavBar(appNavController: AppNavController) {
         }
     }
 
-    val indicatorColor = Color(0xFFFFD643)
-    val selectedContentColor = Color(0xFF1C1B1F)
-    val unselectedContentColor = Color(0xFF9E9E9E)
+    val colors = MaterialTheme.calStuffColors
+    val indicatorColor = colors.highlight
+    val selectedContentColor = colors.textPrimary
+    val unselectedContentColor = colors.textSecondary
 
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(28.dp))
-            .background(Color.White.copy(alpha = 0.85f))
+            .background(colors.surface.copy(alpha = 0.85f))
     ) {
         Box(
             modifier = Modifier

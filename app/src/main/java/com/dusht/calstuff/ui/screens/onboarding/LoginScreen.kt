@@ -27,7 +27,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -55,6 +54,8 @@ import com.dusht.calstuff.auth.PhoneAuthRepository
 import com.dusht.calstuff.login.GoogleSignInUtils
 import com.dusht.calstuff.ui.common.CalAuraOutlinedTextField
 import com.dusht.calstuff.ui.common.CalOrDivider
+import com.dusht.calstuff.ui.components.common.LoadingAnimation
+import com.dusht.calstuff.ui.theme.calStuffColors
 import com.dusht.calstuff.vm.LoginViewModel
 import kotlinx.coroutines.flow.collectLatest
 
@@ -90,16 +91,17 @@ fun LoginScreen(
         viewModel.handleEvent(LoginEvent.ErrorConsumed)
     }
 
+    val colors = MaterialTheme.calStuffColors
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.White),
+            .background(colors.surface),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         LoginBackgroundImage()
 
         if (state.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.padding(16.dp))
+            LoadingAnimation(modifier = Modifier.padding(16.dp), size = 64.dp)
         }
 
         LoginContent(
@@ -226,6 +228,7 @@ private fun PhoneNumberBlock(
     onPhoneContinue: () -> Unit,
     onVerifyOtp: () -> Unit
 ) {
+    val colors = MaterialTheme.calStuffColors
     val phoneDigits = state.phoneDigits.filter { it.isDigit() }
     val canSendCode = phoneDigits.length >= MIN_DIGITS_CONTINUE
     val otpReady = state.otpDigits.length == 6
@@ -250,8 +253,8 @@ private fun PhoneNumberBlock(
                 .height(52.dp),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF5C6BC0),
-                contentColor = Color.White
+                containerColor = colors.info,
+                contentColor = colors.onAccent
             )
         ) {
             Text(
@@ -286,8 +289,8 @@ private fun PhoneNumberBlock(
                         .height(52.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF26A69A),
-                        contentColor = Color.White
+                        containerColor = colors.success,
+                        contentColor = colors.onAccent
                     )
                 ) {
                     Text(
@@ -309,7 +312,7 @@ private fun WelcomeText(
         text = text,
         fontSize = 32.sp,
         fontWeight = FontWeight.Bold,
-        color = Color.Black,
+        color = MaterialTheme.calStuffColors.textPrimary,
         textAlign = TextAlign.Center,
         modifier = modifier
     )
@@ -323,7 +326,7 @@ private fun DescriptionText(
     Text(
         text = text,
         fontSize = 14.sp,
-        color = Color.Gray,
+        color = MaterialTheme.calStuffColors.textSecondary,
         textAlign = TextAlign.Center,
         modifier = modifier
     )
@@ -333,9 +336,10 @@ private fun DescriptionText(
 private fun GoogleSignInButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
-    buttonColor: Color = Color(0xFFFF6B6B),
+    buttonColor: Color = MaterialTheme.calStuffColors.error,
     buttonText: String = "Sign in with Google"
 ) {
+    val colors = MaterialTheme.calStuffColors
     Button(
         onClick = onClick,
         modifier = modifier
@@ -361,7 +365,7 @@ private fun GoogleSignInButton(
                 text = buttonText,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color.White
+                color = colors.onError
             )
         }
     }

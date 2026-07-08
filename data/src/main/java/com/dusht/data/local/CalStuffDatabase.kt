@@ -17,7 +17,7 @@ import com.dusht.data.local.entity.UserProfileEntity
         MealEntryEntity::class,
         StreakEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = false,
 )
 abstract class CalStuffDatabase : RoomDatabase() {

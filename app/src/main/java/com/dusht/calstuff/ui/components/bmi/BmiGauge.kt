@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,8 +26,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.dusht.calstuff.ui.model.BmiCategory
 import com.dusht.calstuff.ui.model.BmiConfig
+import com.dusht.calstuff.ui.theme.CalStuffColors
 import com.dusht.calstuff.ui.theme.FontSize
+import com.dusht.calstuff.ui.theme.calStuffColors
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -35,11 +39,19 @@ private const val GAUGE_SWEEP = 180f
 private const val BMI_MIN = 10f
 private const val BMI_MAX = 40f
 
-private val ZONES = listOf(
-    Triple(0f, 0.283f, Color(0xFF42A5F5)),
-    Triple(0.283f, 0.50f, Color(0xFF66BB6A)),
-    Triple(0.50f, 0.667f, Color(0xFFFFD643)),
-    Triple(0.667f, 1f, Color(0xFFF85B4E))
+/** Themed color for a BMI zone/category — same mapping used by the gauge zones below. */
+fun BmiCategory.themeColor(colors: CalStuffColors): Color = when (this) {
+    BmiCategory.UNDERWEIGHT -> colors.info
+    BmiCategory.NORMAL -> colors.success
+    BmiCategory.OVERWEIGHT -> colors.highlight
+    BmiCategory.OBESE -> colors.error
+}
+
+private fun bmiZones(colors: CalStuffColors) = listOf(
+    Triple(0f, 0.283f, colors.info),
+    Triple(0.283f, 0.50f, colors.success),
+    Triple(0.50f, 0.667f, colors.highlight),
+    Triple(0.667f, 1f, colors.error),
 )
 
 @Composable
@@ -48,6 +60,8 @@ fun BmiGauge(
     modifier: Modifier = Modifier,
     gaugeSize: Dp = 200.dp
 ) {
+    val colors = MaterialTheme.calStuffColors
+    val zones = remember(colors) { bmiZones(colors) }
     val bmi = config.bmiValue.coerceIn(BMI_MIN, BMI_MAX)
 
     val needleProgress = remember { Animatable(0f) }
@@ -78,7 +92,7 @@ fun BmiGauge(
                 val centerY = arcSize.height / 2f + padding
 
                 // Colored zones with gaps
-                ZONES.forEach { (start, end, color) ->
+                zones.forEach { (start, end, color) ->
                     val startAngle = GAUGE_START + start * GAUGE_SWEEP
                     val sweep = (end - start) * GAUGE_SWEEP
                     drawArc(
@@ -105,7 +119,7 @@ fun BmiGauge(
 
                 // Shadow
                 drawLine(
-                    color = Color.Black.copy(alpha = 0.08f),
+                    color = colors.inverseSurface.copy(alpha = 0.08f),
                     start = Offset(baseX + 1f, baseY + 1f),
                     end = Offset(tipX + 1f, tipY + 1f),
                     strokeWidth = 4.dp.toPx(),
@@ -114,7 +128,7 @@ fun BmiGauge(
 
                 // Needle
                 drawLine(
-                    color = Color(0xFF222222),
+                    color = colors.textPrimary,
                     start = Offset(baseX, baseY),
                     end = Offset(tipX, tipY),
                     strokeWidth = 3.dp.toPx(),
@@ -123,19 +137,19 @@ fun BmiGauge(
 
                 // Center dot
                 drawCircle(
-                    color = Color(0xFF222222),
+                    color = colors.textPrimary,
                     radius = 7.dp.toPx(),
                     center = Offset(centerX, centerY)
                 )
                 drawCircle(
-                    color = Color.White,
+                    color = colors.surface,
                     radius = 4.dp.toPx(),
                     center = Offset(centerX, centerY)
                 )
 
                 // Tip dot
                 drawCircle(
-                    color = Color(config.category.colorHex),
+                    color = config.category.themeColor(colors),
                     radius = 5.dp.toPx(),
                     center = Offset(tipX, tipY)
                 )
@@ -149,7 +163,7 @@ fun BmiGauge(
             text = String.format("%.1f", config.bmiValue),
             fontSize = FontSize.display3,
             fontWeight = FontWeight.Bold,
-            color = Color(config.category.colorHex)
+            color = config.category.themeColor(colors)
         )
 
         // Category meaning
@@ -157,7 +171,7 @@ fun BmiGauge(
             text = config.category.label,
             fontSize = FontSize.small,
             fontWeight = FontWeight.SemiBold,
-            color = Color(config.category.colorHex)
+            color = config.category.themeColor(colors)
         )
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -167,7 +181,7 @@ fun BmiGauge(
             text = config.healthNote,
             fontSize = FontSize.xxSmall,
             fontWeight = FontWeight.Normal,
-            color = Color(0xFFAAAAAA)
+            color = colors.textSecondary
         )
     }
 }

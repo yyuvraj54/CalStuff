@@ -7,13 +7,16 @@ import kotlinx.coroutines.flow.Flow
  * Contract for persisting and observing user profile data.
  *
  * Implementations:
- *  - Android/Firebase: FirestoreUserProfileRepositoryImpl (data module)
+ *  - Android/Firebase: UserProfileRepositoryImpl (data module) — Room-cached, Firestore-backed.
  *  - Future custom backend: swap binding in DataModule — no ViewModel changes needed.
  */
 interface UserProfileRepository {
 
     /** UID of the currently authenticated user, or null if not logged in. */
     fun currentUserId(): String?
+
+    /** E.164 phone number the current user signed in with, or null if not phone-authenticated. */
+    fun currentPhoneNumber(): String?
 
     /** Live stream of the current user's profile. Emits null if not yet created. */
     fun observeProfile(): Flow<UserProfile?>

@@ -11,6 +11,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -211,7 +212,8 @@ fun WidgetGrid(
                 ) {
                     RenderWidget(
                         placement = placement,
-                        data = data
+                        data = data,
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
             }

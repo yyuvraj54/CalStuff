@@ -82,7 +82,8 @@ data class NutritionUiState(
                 ),
                 bmiConfig = BmiConfig.mock(),
                 streakDays = 0,
-                editableWindowDays = 2,
+                // Yesterday tab disabled for now — today-only editing.
+                editableWindowDays = 1,
             )
         }
     }

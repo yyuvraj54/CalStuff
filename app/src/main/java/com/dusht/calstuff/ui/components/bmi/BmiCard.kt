@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -25,16 +26,18 @@ import androidx.compose.ui.unit.dp
 import com.dusht.calstuff.ui.model.BmiConfig
 import com.dusht.calstuff.ui.model.Gender
 import com.dusht.calstuff.ui.theme.FontSize
+import com.dusht.calstuff.ui.theme.calStuffColors
 
 @Composable
 fun BmiCard(
     config: BmiConfig,
     modifier: Modifier = Modifier
 ) {
+    val colors = MaterialTheme.calStuffColors
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = colors.surface)
     ) {
         Column(
             modifier = Modifier
@@ -50,7 +53,7 @@ fun BmiCard(
             ) {
                 Text(
                     text = "Body Mass Index",
-                    color = Color(0xFFBBBBBB),
+                    color = colors.textSecondary,
                     fontSize = FontSize.medium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -59,12 +62,12 @@ fun BmiCard(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(config.category.colorHex).copy(alpha = 0.15f))
+                        .background(config.category.themeColor(colors).copy(alpha = 0.15f))
                         .padding(horizontal = 12.dp, vertical = 4.dp)
                 ) {
                     Text(
                         text = config.category.label,
-                        color = Color(config.category.colorHex),
+                        color = config.category.themeColor(colors),
                         fontSize = FontSize.xSmall,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -99,16 +102,17 @@ private fun StatItem(
     label: String,
     value: String
 ) {
+    val colors = MaterialTheme.calStuffColors
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = value,
-            color = Color(0xFF222222),
+            color = colors.textPrimary,
             fontSize = FontSize.medium,
             fontWeight = FontWeight.Bold
         )
         Text(
             text = label,
-            color = Color(0xFFBBBBBB),
+            color = colors.textSecondary,
             fontSize = FontSize.xxSmall,
             fontWeight = FontWeight.Medium
         )
@@ -121,7 +125,7 @@ private fun StatDivider() {
         modifier = Modifier
             .width(1.dp)
             .height(32.dp)
-            .background(Color(0xFFEEEEEE))
+            .background(MaterialTheme.calStuffColors.divider)
     )
 }
 

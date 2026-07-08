@@ -123,6 +123,8 @@ class ProfileOnboardingViewModel @Inject constructor(
             dailyCalorieGoal = computeCalorieGoal(s),
             createdAt = now,
             updatedAt = now,
+            // Phone number the user signed in with (login already collected it — no need to ask again).
+            phoneNumber = userProfileRepository.currentPhoneNumber().orEmpty(),
         )
         viewModelScope.launch {
             userProfileRepository.saveProfile(profile)

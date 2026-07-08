@@ -12,7 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -35,6 +35,7 @@ import com.dusht.calstuff.ui.screens.navscreen.profile.ProfileViewModel
 import com.dusht.calstuff.ui.screens.onboarding.LoginScreen
 import com.dusht.calstuff.ui.screens.onboarding.OnboardingFormScreen
 import com.dusht.calstuff.ui.screens.onboarding.PostLoginScreen
+import com.dusht.calstuff.ui.theme.calStuffColors
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dusht.calstuff.vm.NutritionViewModel
 import com.dusht.core.logging.AppLogger
@@ -71,8 +72,9 @@ fun AppNavGraph(
     } ?: false
 
     val startDestination = getStartDestination(isLoggedIn, hasCompletedOnboarding)
+    val colors = MaterialTheme.calStuffColors
 
-    Box(modifier = Modifier.fillMaxSize().background(Color(0xFFF3F1EB))) {
+    Box(modifier = Modifier.fillMaxSize().background(colors.background)) {
         AppNavHostContent(
             innerPadding = PaddingValues(0.dp),
             appNavController = appNavController,
@@ -85,8 +87,8 @@ fun AppNavGraph(
                 onClick = {
                     appNavController.navigate(AppRoute.AddMeal())
                 },
-                containerColor = Color(0xFFFFD643),
-                contentColor = Color(0xFF222222),
+                containerColor = colors.highlight,
+                contentColor = colors.textPrimary,
                 shape = CircleShape,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
@@ -172,6 +174,7 @@ private fun AppNavHostContent(
                 onNavigateToLogin = {
                     appNavController.navigateAndClearBackStack(AppRoute.Login)
                 },
+                onBack = { appNavController.navigateUp() },
             )
         }
 

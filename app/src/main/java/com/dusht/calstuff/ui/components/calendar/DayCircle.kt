@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,12 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-val AppYellow = Color(0xFFFFD643)
-
-private val TodayColor = Color(0xFFFF5252)
-private val CalorieGreen = Color(0xFF66BB6A)
-private val CalorieRed = Color(0xFFF85B4E)
+import com.dusht.calstuff.ui.theme.calStuffColors
 
 /**
  * @param calorieRatio consumed/goal for this day.
@@ -46,16 +42,17 @@ fun DayCircle(
     onClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    val colors = MaterialTheme.calStuffColors
     val backgroundColor = when {
-        isSelected -> Color.White
-        isHighlighted -> AppYellow
-        else -> Color.Black
+        isSelected -> colors.onInverseSurface
+        isHighlighted -> colors.onInverseSurfaceVariant
+        else -> colors.inverseSurface
     }
     val textColor = when {
-        isSelected -> Color.Black
-        isToday -> TodayColor
-        isHighlighted -> Color.Black
-        else -> AppYellow
+        isSelected -> colors.inverseSurface
+        isToday -> colors.error
+        isHighlighted -> colors.inverseSurface
+        else -> colors.onInverseSurfaceVariant
     }
 
     val hasCalorieData = calorieRatio != null && calorieRatio > 0f
@@ -82,9 +79,9 @@ fun DayCircle(
 
                 // Color: green at low fill, transitions to red as approaching full
                 val borderColor = if (exceeded) {
-                    CalorieRed
+                    colors.error
                 } else {
-                    lerp(CalorieGreen, CalorieRed, ratio)
+                    lerp(colors.success, colors.error, ratio)
                 }
 
                 // Background track (faint)
@@ -117,7 +114,7 @@ fun DayCircle(
                 val sw = 2.dp.toPx()
                 val padding = sw / 2f
                 drawCircle(
-                    color = TodayColor,
+                    color = colors.error,
                     radius = (this.size.width - sw) / 2f,
                     center = Offset(this.size.width / 2f, this.size.height / 2f),
                     style = Stroke(width = sw)

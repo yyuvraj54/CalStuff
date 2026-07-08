@@ -36,6 +36,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -57,6 +58,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.horizontalScroll
 import com.dusht.calstuff.ui.model.MealType
 import com.dusht.calstuff.ui.theme.FontSize
+import com.dusht.calstuff.ui.theme.calStuffColors
+import com.dusht.calstuff.ui.theme.themeColor
 import java.util.Calendar
 import java.util.Locale
 
@@ -129,11 +132,12 @@ fun AddMealScreen(
     var manualMealType by remember { mutableStateOf(MealType.SNACKS) }
 
     val canSave = foodItems.isNotEmpty()
+    val colors = MaterialTheme.calStuffColors
 
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFF3F1EB))
+            .background(colors.background)
             .statusBarsPadding()
     ) {
         // Scrollable content
@@ -147,11 +151,11 @@ fun AddMealScreen(
             // ── Top bar ──
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.Default.ArrowBack, "Back", tint = Color(0xFF222222))
+                    Icon(Icons.Default.ArrowBack, "Back", tint = colors.textPrimary)
                 }
                 Spacer(Modifier.width(8.dp))
                 Column {
-                    Text("Add Meal", fontSize = FontSize.xxLarge, fontWeight = FontWeight.Bold, color = Color(0xFF222222))
+                    Text("Add Meal", fontSize = FontSize.xxLarge, fontWeight = FontWeight.Bold, color = colors.textPrimary)
                     val dayLabel = when (selectedDay) {
                         today -> "Today"
                         today - 1 -> "Yesterday"
@@ -160,7 +164,7 @@ fun AddMealScreen(
                             "$monthName $selectedDay"
                         }
                     }
-                    Text(dayLabel, fontSize = FontSize.small, fontWeight = FontWeight.Medium, color = Color(0xFFBBBBBB))
+                    Text(dayLabel, fontSize = FontSize.small, fontWeight = FontWeight.Medium, color = colors.textSecondary)
                 }
             }
 
@@ -188,8 +192,8 @@ fun AddMealScreen(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(20.dp))
-                                .background(if (isSelected) Color(0xFF222222) else Color.White)
-                                .then(if (!isSelected) Modifier.border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(20.dp)) else Modifier)
+                                .background(if (isSelected) colors.inverseSurface else colors.surface)
+                                .then(if (!isSelected) Modifier.border(1.dp, colors.divider, RoundedCornerShape(20.dp)) else Modifier)
                                 .clickable { selectedDay = day }
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
                         ) {
@@ -197,7 +201,7 @@ fun AddMealScreen(
                                 text = chipLabel,
                                 fontSize = FontSize.small,
                                 fontWeight = FontWeight.Medium,
-                                color = if (isSelected) Color.White else Color(0xFF666666)
+                                color = if (isSelected) colors.onInverseSurface else colors.textSecondary
                             )
                         }
                     }
@@ -207,8 +211,8 @@ fun AddMealScreen(
             Spacer(Modifier.height(20.dp))
 
             // ── AI Description ──
-            Text("Describe what you ate", fontSize = FontSize.medium, fontWeight = FontWeight.SemiBold, color = Color(0xFF222222))
-            Text("AI will estimate calories & macros for each item", fontSize = FontSize.xSmall, color = Color(0xFFBBBBBB))
+            Text("Describe what you ate", fontSize = FontSize.medium, fontWeight = FontWeight.SemiBold, color = colors.textPrimary)
+            Text("AI will estimate calories & macros for each item", fontSize = FontSize.xSmall, color = colors.textSecondary)
             Spacer(Modifier.height(10.dp))
 
             val wordCount = aiDescription.trim().split("\\s+".toRegex()).count { it.isNotBlank() }
@@ -218,26 +222,26 @@ fun AddMealScreen(
                     val wc = v.trim().split("\\s+".toRegex()).count { it.isNotBlank() }
                     if (wc <= 300 || v.length < aiDescription.length) aiDescription = v
                 },
-                placeholder = { Text("e.g. 2 roti with dal, a bowl of rice, and buttermilk", color = Color(0xFFCCCCCC), fontSize = FontSize.small) },
-                supportingText = { Text("$wordCount / 300 words", fontSize = FontSize.xxSmall, color = if (wordCount > 280) Color(0xFFF85B4E) else Color(0xFFBBBBBB)) },
+                placeholder = { Text("e.g. 2 roti with dal, a bowl of rice, and buttermilk", color = colors.textSecondary, fontSize = FontSize.small) },
+                supportingText = { Text("$wordCount / 300 words", fontSize = FontSize.xxSmall, color = if (wordCount > 280) colors.error else colors.textSecondary) },
                 modifier = Modifier.fillMaxWidth().height(130.dp),
                 shape = RoundedCornerShape(14.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFFFFD643), unfocusedBorderColor = Color(0xFFE0E0E0),
-                    focusedContainerColor = Color.White, unfocusedContainerColor = Color.White, cursorColor = Color(0xFF222222)
+                    focusedBorderColor = colors.highlight, unfocusedBorderColor = colors.divider,
+                    focusedContainerColor = colors.surface, unfocusedContainerColor = colors.surface, cursorColor = colors.textPrimary
                 )
             )
             Spacer(Modifier.height(16.dp))
 
             // ── Food items list ──
             if (foodItems.isNotEmpty()) {
-                Text("${foodItems.size} item${if (foodItems.size > 1) "s" else ""} added", fontSize = FontSize.medium, fontWeight = FontWeight.SemiBold, color = Color(0xFF222222))
+                Text("${foodItems.size} item${if (foodItems.size > 1) "s" else ""} added", fontSize = FontSize.medium, fontWeight = FontWeight.SemiBold, color = colors.textPrimary)
                 Spacer(Modifier.height(10.dp))
 
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                    colors = CardDefaults.cardColors(containerColor = colors.surface)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         foodItems.forEachIndexed { index, item ->
@@ -247,30 +251,30 @@ fun AddMealScreen(
                                 onRemove = { foodItems.removeAt(index) }
                             )
                             if (index < foodItems.lastIndex) {
-                                HorizontalDivider(Modifier.padding(vertical = 10.dp), color = Color(0xFFF0F0F0))
+                                HorizontalDivider(Modifier.padding(vertical = 10.dp), color = colors.divider)
                             }
                         }
 
                         // Totals
-                        HorizontalDivider(Modifier.padding(vertical = 10.dp), color = Color(0xFFE0E0E0), thickness = 1.5.dp)
+                        HorizontalDivider(Modifier.padding(vertical = 10.dp), color = colors.divider, thickness = 1.5.dp)
                         val tCal = foodItems.sumOf { it.calories }
                         val tP = foodItems.sumOf { it.protein.toDouble() }.toFloat()
                         val tC = foodItems.sumOf { it.carbs.toDouble() }.toFloat()
                         val tF = foodItems.sumOf { it.fat.toDouble() }.toFloat()
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Total", fontSize = FontSize.medium, fontWeight = FontWeight.Bold, color = Color(0xFF222222))
-                            Text("$tCal kcal", fontSize = FontSize.medium, fontWeight = FontWeight.Bold, color = Color(0xFFF85B4E))
+                            Text("Total", fontSize = FontSize.medium, fontWeight = FontWeight.Bold, color = colors.textPrimary)
+                            Text("$tCal kcal", fontSize = FontSize.medium, fontWeight = FontWeight.Bold, color = colors.error)
                         }
                         Spacer(Modifier.height(4.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                            MacroBadge("P", "${tP.toInt()}g", Color(0xFFFFD643))
-                            MacroBadge("C", "${tC.toInt()}g", Color(0xFFF85B4E))
-                            MacroBadge("F", "${tF.toInt()}g", Color(0xFF222222))
+                            MacroBadge("P", "${tP.toInt()}g", colors.highlight)
+                            MacroBadge("C", "${tC.toInt()}g", colors.error)
+                            MacroBadge("F", "${tF.toInt()}g", colors.textPrimary)
                         }
 
                         // Add more button inside the card
                         Spacer(Modifier.height(12.dp))
-                        HorizontalDivider(color = Color(0xFFF0F0F0))
+                        HorizontalDivider(color = colors.divider)
                         Spacer(Modifier.height(8.dp))
                         Row(
                             modifier = Modifier
@@ -279,9 +283,9 @@ fun AddMealScreen(
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(Icons.Default.Add, null, tint = Color(0xFFFFD643), modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.Add, null, tint = colors.highlight, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(6.dp))
-                            Text("Add another item", fontSize = FontSize.small, fontWeight = FontWeight.SemiBold, color = Color(0xFFFFD643))
+                            Text("Add another item", fontSize = FontSize.small, fontWeight = FontWeight.SemiBold, color = colors.highlight)
                         }
                     }
                 }
@@ -298,14 +302,14 @@ fun AddMealScreen(
                             modifier = Modifier
                                 .size(48.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFFFFD643))
+                                .background(colors.highlight)
                                 .clickable { showAddManualForm = true },
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(Icons.Default.Add, "Add item", tint = Color(0xFF222222), modifier = Modifier.size(24.dp))
+                            Icon(Icons.Default.Add, "Add item", tint = colors.onHighlight, modifier = Modifier.size(24.dp))
                         }
                         Spacer(Modifier.height(8.dp))
-                        Text("Add item manually", fontSize = FontSize.small, color = Color(0xFFBBBBBB))
+                        Text("Add item manually", fontSize = FontSize.small, color = colors.textSecondary)
                     }
                 }
             }
@@ -315,10 +319,10 @@ fun AddMealScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                    colors = CardDefaults.cardColors(containerColor = colors.surface)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Add Item", fontSize = FontSize.medium, fontWeight = FontWeight.SemiBold, color = Color(0xFF222222))
+                        Text("Add Item", fontSize = FontSize.medium, fontWeight = FontWeight.SemiBold, color = colors.textPrimary)
                         Spacer(Modifier.height(10.dp))
 
                         // Meal type pills
@@ -344,7 +348,7 @@ fun AddMealScreen(
                         var manualError by remember { mutableStateOf("") }
 
                         if (manualError.isNotBlank()) {
-                            Text(manualError, fontSize = FontSize.xSmall, color = Color(0xFFF85B4E))
+                            Text(manualError, fontSize = FontSize.xSmall, color = colors.error)
                             Spacer(Modifier.height(6.dp))
                         }
 
@@ -353,7 +357,7 @@ fun AddMealScreen(
                                 onClick = { showAddManualForm = false; manualError = "" },
                                 shape = RoundedCornerShape(12.dp),
                                 modifier = Modifier.weight(1f)
-                            ) { Text("Cancel", fontSize = FontSize.small, color = Color(0xFF888888)) }
+                            ) { Text("Cancel", fontSize = FontSize.small, color = colors.textSecondary) }
 
                             Button(
                                 onClick = {
@@ -378,9 +382,9 @@ fun AddMealScreen(
                                 },
                                 enabled = manualName.isNotBlank() && manualCal.isNotBlank(),
                                 shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD643), disabledContainerColor = Color(0xFFE8E8E8)),
+                                colors = ButtonDefaults.buttonColors(containerColor = colors.highlight, disabledContainerColor = colors.divider),
                                 modifier = Modifier.weight(1f)
-                            ) { Text("Add", fontSize = FontSize.small, fontWeight = FontWeight.SemiBold, color = Color(0xFF222222)) }
+                            ) { Text("Add", fontSize = FontSize.small, fontWeight = FontWeight.SemiBold, color = colors.onHighlight) }
                         }
                     }
                 }
@@ -394,7 +398,7 @@ fun AddMealScreen(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .background(Color(0xFFF3F1EB))
+                .background(colors.background)
                 .navigationBarsPadding()
                 .padding(horizontal = 20.dp, vertical = 10.dp)
         ) {
@@ -411,10 +415,10 @@ fun AddMealScreen(
                     enabled = !isAnalyzing,
                     modifier = Modifier.fillMaxWidth().height(44.dp),
                     shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD643), contentColor = Color(0xFF222222))
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.highlight, contentColor = colors.onHighlight)
                 ) {
                     if (isAnalyzing) {
-                        CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp, color = Color(0xFF222222))
+                        CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp, color = colors.onHighlight)
                         Spacer(Modifier.width(8.dp))
                         Text("Analyzing...", fontSize = FontSize.small, fontWeight = FontWeight.SemiBold)
                     } else {
@@ -461,12 +465,12 @@ fun AddMealScreen(
                 enabled = canSave,
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF222222), disabledContainerColor = Color(0xFFDDDDDD))
+                colors = ButtonDefaults.buttonColors(containerColor = colors.inverseSurface, disabledContainerColor = colors.divider)
             ) {
                 Text(
                     if (canSave) "Save ${foodItems.size} Item${if (foodItems.size > 1) "s" else ""}" else "Add items to save",
                     fontSize = FontSize.body, fontWeight = FontWeight.SemiBold,
-                    color = if (canSave) Color.White else Color(0xFF999999)
+                    color = if (canSave) colors.onInverseSurface else colors.textSecondary
                 )
             }
         }
@@ -484,6 +488,7 @@ private fun FoodItemRow(item: FoodItem, onEdit: (FoodItem) -> Unit, onRemove: ()
     var editC by remember(item) { mutableStateOf(item.carbs.toInt().toString()) }
     var editF by remember(item) { mutableStateOf(item.fat.toInt().toString()) }
     var editMealType by remember(item) { mutableStateOf(item.mealType) }
+    val colors = MaterialTheme.calStuffColors
 
     Column {
         if (isEditing) {
@@ -491,26 +496,26 @@ private fun FoodItemRow(item: FoodItem, onEdit: (FoodItem) -> Unit, onRemove: ()
                 MealType.entries.forEach { type -> MealTypePill(type, editMealType == type, { editMealType = type }, Modifier.weight(1f)) }
             }
             Spacer(Modifier.height(8.dp))
-            OutlinedTextField(editName, { editName = it }, label = { Text("Name", fontSize = FontSize.xxSmall) }, singleLine = true, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(10.dp), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFFFFD643), unfocusedBorderColor = Color(0xFFE8E8E8)))
+            OutlinedTextField(editName, { editName = it }, label = { Text("Name", fontSize = FontSize.xxSmall) }, singleLine = true, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(10.dp), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = colors.highlight, unfocusedBorderColor = colors.divider))
             Spacer(Modifier.height(6.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 listOf("kcal" to editCal, "P(g)" to editP, "C(g)" to editC, "F(g)" to editF).forEachIndexed { i, (lbl, v) ->
                     OutlinedTextField(v, { nv ->
                         val filtered = nv.filter { c -> c.isDigit() }
                         when (i) { 0 -> editCal = filtered; 1 -> editP = filtered; 2 -> editC = filtered; 3 -> editF = filtered }
-                    }, label = { Text(lbl, fontSize = FontSize.xxSmall) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), modifier = Modifier.weight(1f), shape = RoundedCornerShape(10.dp), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFFFFD643), unfocusedBorderColor = Color(0xFFE8E8E8)))
+                    }, label = { Text(lbl, fontSize = FontSize.xxSmall) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), modifier = Modifier.weight(1f), shape = RoundedCornerShape(10.dp), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = colors.highlight, unfocusedBorderColor = colors.divider))
                 }
             }
             var editError by remember { mutableStateOf("") }
 
             if (editError.isNotBlank()) {
                 Spacer(Modifier.height(4.dp))
-                Text(editError, fontSize = FontSize.xSmall, color = Color(0xFFF85B4E))
+                Text(editError, fontSize = FontSize.xSmall, color = colors.error)
             }
 
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton({ isEditing = false; editError = "" }, shape = RoundedCornerShape(10.dp), modifier = Modifier.weight(1f)) { Text("Cancel", fontSize = FontSize.xSmall, color = Color(0xFF888888)) }
+                OutlinedButton({ isEditing = false; editError = "" }, shape = RoundedCornerShape(10.dp), modifier = Modifier.weight(1f)) { Text("Cancel", fontSize = FontSize.xSmall, color = colors.textSecondary) }
                 Button(
                     onClick = {
                         val candidate = FoodItem(editName.trim().ifBlank { item.name }, editCal.toIntOrNull() ?: item.calories, editP.toFloatOrNull() ?: item.protein, editC.toFloatOrNull() ?: item.carbs, editF.toFloatOrNull() ?: item.fat, editMealType)
@@ -519,31 +524,31 @@ private fun FoodItemRow(item: FoodItem, onEdit: (FoodItem) -> Unit, onRemove: ()
                         else { editError = errors.first() }
                     },
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD643)),
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.highlight),
                     modifier = Modifier.weight(1f)
-                ) { Text("Save", fontSize = FontSize.xSmall, color = Color(0xFF222222)) }
+                ) { Text("Save", fontSize = FontSize.xSmall, color = colors.onHighlight) }
             }
         } else {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text(item.name, fontSize = FontSize.medium, fontWeight = FontWeight.SemiBold, color = Color(0xFF222222))
-                    val tc = Color(item.mealType.color)
+                    Text(item.name, fontSize = FontSize.medium, fontWeight = FontWeight.SemiBold, color = colors.textPrimary)
+                    val tc = item.mealType.themeColor(colors)
                     Box(Modifier.padding(top = 3.dp).clip(RoundedCornerShape(8.dp)).background(tc.copy(alpha = 0.12f)).padding(horizontal = 8.dp, vertical = 2.dp)) {
                         Text(item.mealType.label, fontSize = FontSize.xxxSmall, fontWeight = FontWeight.SemiBold, color = tc)
                     }
                 }
-                Text("${item.calories} kcal", fontSize = FontSize.medium, fontWeight = FontWeight.Bold, color = Color(0xFF888888))
+                Text("${item.calories} kcal", fontSize = FontSize.medium, fontWeight = FontWeight.Bold, color = colors.textSecondary)
             }
             Spacer(Modifier.height(4.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                MacroBadge("P", "${item.protein.toInt()}g", Color(0xFFFFD643))
-                MacroBadge("C", "${item.carbs.toInt()}g", Color(0xFFF85B4E))
-                MacroBadge("F", "${item.fat.toInt()}g", Color(0xFF222222))
+                MacroBadge("P", "${item.protein.toInt()}g", colors.highlight)
+                MacroBadge("C", "${item.carbs.toInt()}g", colors.error)
+                MacroBadge("F", "${item.fat.toInt()}g", colors.textPrimary)
             }
             Spacer(Modifier.height(6.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Edit", fontSize = FontSize.xSmall, fontWeight = FontWeight.SemiBold, color = Color(0xFFFFD643), modifier = Modifier.clickable { isEditing = true })
-                Text("Remove", fontSize = FontSize.xSmall, fontWeight = FontWeight.SemiBold, color = Color(0xFFF85B4E), modifier = Modifier.clickable { onRemove() })
+                Text("Edit", fontSize = FontSize.xSmall, fontWeight = FontWeight.SemiBold, color = colors.highlight, modifier = Modifier.clickable { isEditing = true })
+                Text("Remove", fontSize = FontSize.xSmall, fontWeight = FontWeight.SemiBold, color = colors.error, modifier = Modifier.clickable { onRemove() })
             }
         }
     }
@@ -553,35 +558,38 @@ private fun FoodItemRow(item: FoodItem, onEdit: (FoodItem) -> Unit, onRemove: ()
 
 @Composable
 private fun MacroBadge(label: String, value: String, color: Color) {
+    val colors = MaterialTheme.calStuffColors
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.size(8.dp).clip(RoundedCornerShape(2.dp)).background(color))
         Spacer(Modifier.width(4.dp))
-        Text("$label: $value", fontSize = FontSize.xxSmall, color = Color(0xFF888888))
+        Text("$label: $value", fontSize = FontSize.xxSmall, color = colors.textSecondary)
     }
 }
 
 @Composable
 private fun MealTextField(value: String, onValueChange: (String) -> Unit, label: String, placeholder: String, keyboardType: KeyboardType = KeyboardType.Text, modifier: Modifier = Modifier) {
+    val colors = MaterialTheme.calStuffColors
     OutlinedTextField(
         value = value, onValueChange = onValueChange,
         label = { Text(label, fontSize = FontSize.small) },
-        placeholder = { Text(placeholder, color = Color(0xFFCCCCCC), fontSize = FontSize.small) },
+        placeholder = { Text(placeholder, color = colors.textSecondary, fontSize = FontSize.small) },
         modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp),
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType), singleLine = true,
-        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFFFFD643), unfocusedBorderColor = Color(0xFFE0E0E0), focusedContainerColor = Color.White, unfocusedContainerColor = Color.White, cursorColor = Color(0xFF222222))
+        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = colors.highlight, unfocusedBorderColor = colors.divider, focusedContainerColor = colors.surface, unfocusedContainerColor = colors.surface, cursorColor = colors.textPrimary)
     )
 }
 
 @Composable
 private fun MealTypePill(type: MealType, isSelected: Boolean, onSelect: () -> Unit, modifier: Modifier = Modifier) {
-    val c = Color(type.color)
+    val colors = MaterialTheme.calStuffColors
+    val c = type.themeColor(colors)
     Box(
         modifier.clip(RoundedCornerShape(20.dp)).background(if (isSelected) c else Color.Transparent)
             .then(if (!isSelected) Modifier.border(1.5.dp, c, RoundedCornerShape(20.dp)) else Modifier)
             .clickable(onClick = onSelect).padding(horizontal = 8.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(type.label, fontSize = FontSize.xxxSmall, fontWeight = FontWeight.SemiBold, color = if (isSelected) { if (type == MealType.DINNER) Color.White else Color.Black } else c, maxLines = 1)
+        Text(type.label, fontSize = FontSize.xxxSmall, fontWeight = FontWeight.SemiBold, color = if (isSelected) { if (type == MealType.DINNER) colors.onInverseSurface else colors.inverseSurface } else c, maxLines = 1)
     }
 }
 
