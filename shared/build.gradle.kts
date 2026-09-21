@@ -19,19 +19,31 @@ kotlin {
         binaries.framework {
             baseName = "CalStuffShared"
             isStatic = true
+            // Exposes MutableStateFlow/Flow builders to Swift — needed so Swift-side repository
+            // implementations (UserProfileRepository, NutritionRepository, StreakRepository) can
+            // construct the Flow their observe*() methods must return (e.g. wrapping a Firestore
+            // addSnapshotListener). Without this, only the *interface* types (Flow/StateFlow as
+            // protocols) are visible from Swift, not anything that can construct one.
+            export(libs.kotlinx.coroutines.core)
         }
     }
     iosSimulatorArm64 {
         binaries.framework {
             baseName = "CalStuffShared"
             isStatic = true
+            export(libs.kotlinx.coroutines.core)
         }
     }
 
     sourceSets {
         commonMain {
             dependencies {
-                implementation(libs.kotlinx.coroutines.core)
+                api(libs.kotlinx.coroutines.core)
+            }
+        }
+        commonTest {
+            dependencies {
+                implementation(kotlin("test"))
             }
         }
     }

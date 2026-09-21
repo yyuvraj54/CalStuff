@@ -46,7 +46,7 @@ struct CalAuraOutlinedTextField: View {
             TextField(
                 "",
                 text: $text,
-                prompt: Text(placeholder).foregroundStyle(LoginDesignTokens.fieldPlaceholder)
+                prompt: Text(placeholder).foregroundColor(LoginDesignTokens.fieldPlaceholder)
             )
             .foregroundStyle(LoginDesignTokens.fieldText)
             .tint(LoginDesignTokens.fieldCursor)

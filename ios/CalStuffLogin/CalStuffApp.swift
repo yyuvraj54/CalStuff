@@ -4,34 +4,20 @@
 //
 
 import SwiftUI
-import FirebaseCore
 import FirebaseAnalytics
+import FirebaseAuth
 
 @main
 struct CalStuffApp: App {
-    @StateObject private var loginViewModel = LoginViewModel()
-
-    init() {
-        FirebaseApp.configure()
-    }
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     var body: some Scene {
         WindowGroup {
-            LoginView(
-                viewModel: loginViewModel,
-                onGoogleSignIn: {
-                    Task { await loginViewModel.signInWithGoogle() }
-                },
-                onPhoneContinue: {
-                    Task { await loginViewModel.sendPhoneVerificationCode() }
-                },
-                onVerifyOtp: {
-                    Task { await loginViewModel.verifySmsCode() }
+            RootView(dependencies: appDelegate.dependencies)
+                .onOpenURL { url in
+                    if Auth.auth().canHandle(url) { return }
+                    _ = FirebaseAuthService.handleGoogleURL(url)
                 }
-            )
-            .onOpenURL { url in
-                _ = FirebaseAuthService.handleGoogleURL(url)
-            }
         }
     }
 }

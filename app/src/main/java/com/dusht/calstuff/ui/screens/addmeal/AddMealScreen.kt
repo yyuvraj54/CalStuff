@@ -72,27 +72,9 @@ data class FoodItem(
     val mealType: MealType = MealType.SNACKS
 )
 
-/** Validation limits for a single food item */
-object MealLimits {
-    const val MAX_CALORIES = 5000
-    const val MAX_PROTEIN = 300f
-    const val MAX_CARBS = 500f
-    const val MAX_FAT = 200f
-}
-
-fun validateFoodItem(item: FoodItem): List<String> {
-    val errors = mutableListOf<String>()
-    if (item.name.isBlank()) errors.add("Food name is required")
-    if (item.calories <= 0) errors.add("Calories must be greater than 0")
-    if (item.calories > MealLimits.MAX_CALORIES) errors.add("Calories cannot exceed ${MealLimits.MAX_CALORIES}")
-    if (item.protein > MealLimits.MAX_PROTEIN) errors.add("Protein cannot exceed ${MealLimits.MAX_PROTEIN.toInt()}g")
-    if (item.carbs > MealLimits.MAX_CARBS) errors.add("Carbs cannot exceed ${MealLimits.MAX_CARBS.toInt()}g")
-    if (item.fat > MealLimits.MAX_FAT) errors.add("Fat cannot exceed ${MealLimits.MAX_FAT.toInt()}g")
-    // Macros shouldn't exceed calories (1g protein=4cal, 1g carbs=4cal, 1g fat=9cal)
-    val macroCalories = (item.protein * 4 + item.carbs * 4 + item.fat * 9).toInt()
-    if (macroCalories > item.calories * 1.5) errors.add("Macros seem too high for the calorie count")
-    return errors
-}
+/** Delegates to the shared (Android+iOS) validation rules in `:shared`. */
+fun validateFoodItem(item: FoodItem): List<String> =
+    com.dusht.shared.logic.validateFoodItem(item.name, item.calories, item.protein, item.carbs, item.fat)
 
 data class MealEntry(
     val mealType: MealType,

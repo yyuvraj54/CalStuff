@@ -2,6 +2,9 @@ package com.dusht.calstuff.vm
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dusht.shared.logic.CalorieGoalCalculator
+import com.dusht.shared.model.ActivityLevel
+import com.dusht.shared.model.Gender
 import com.dusht.shared.model.UserProfile
 import com.dusht.shared.repository.UserProfileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -155,28 +158,16 @@ class ProfileOnboardingViewModel @Inject constructor(
     }
 
     /**
-     * Mifflin–St Jeor equation for TDEE (Total Daily Energy Expenditure).
-     * Returns a reasonable default (2000 kcal) if inputs are missing.
+     * Mifflin–St Jeor equation for TDEE — the actual math lives in [CalorieGoalCalculator]
+     * (shared with iOS); this just maps the onboarding-local enums onto the shared ones.
      */
-    private fun computeCalorieGoal(s: ProfileOnboardingUiState): Int {
-        val weight = s.weightKgText.toFloatOrNull() ?: return 2000
-        val height = s.heightCmText.toFloatOrNull() ?: return 2000
-        val age = s.ageText.toIntOrNull() ?: return 2000
-        val bmr = if (s.gender == ProfileGender.MALE) {
-            10f * weight + 6.25f * height - 5f * age + 5f
-        } else {
-            10f * weight + 6.25f * height - 5f * age - 161f
-        }
-        val multiplier = when (s.activity) {
-            ProfileActivityLevel.SEDENTARY  -> 1.2f
-            ProfileActivityLevel.LIGHT      -> 1.375f
-            ProfileActivityLevel.MODERATE   -> 1.55f
-            ProfileActivityLevel.ACTIVE     -> 1.725f
-            ProfileActivityLevel.VERY_ACTIVE -> 1.9f
-            null                            -> 1.2f
-        }
-        return (bmr * multiplier).toInt().coerceIn(1200, 5000)
-    }
+    private fun computeCalorieGoal(s: ProfileOnboardingUiState): Int = CalorieGoalCalculator.compute(
+        gender = s.gender?.let { Gender.valueOf(it.name) },
+        ageYears = s.ageText.toIntOrNull(),
+        heightCm = s.heightCmText.toFloatOrNull(),
+        weightKg = s.weightKgText.toFloatOrNull(),
+        activityLevel = s.activity?.let { ActivityLevel.valueOf(it.name) },
+    )
 
     companion object {
         const val TOTAL_STEPS = 6

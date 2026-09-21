@@ -55,7 +55,7 @@ enum FirebaseAuthService {
             return
         }
 
-        let credential = PhoneAuthProvider.provider().credential(withVerificationID: verificationId, smsCode: code)
+        let credential = PhoneAuthProvider.provider().credential(withVerificationID: verificationId, verificationCode: code)
         _ = try await Auth.auth().signIn(with: credential)
     }
 

@@ -51,7 +51,7 @@ struct LoginView: View {
                     }
                     .frame(maxHeight: .infinity)
                     .scrollDismissesKeyboard(.interactively)
-                    .onChange(of: viewModel.phonePhase) { _, newPhase in
+                    .onChange(of: viewModel.phonePhase) { newPhase in
                         if newPhase == .otpEntry {
                             focusedField = .otp
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
@@ -61,7 +61,7 @@ struct LoginView: View {
                             }
                         }
                     }
-                    .onChange(of: viewModel.otpReady) { _, ready in
+                    .onChange(of: viewModel.otpReady) { ready in
                         if ready {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                                 withAnimation(.easeOut(duration: 0.25)) {

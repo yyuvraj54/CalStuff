@@ -46,6 +46,80 @@ flowchart TB
 - **Middle ring**: Android (`:data`) and iOS (Swift + optional Kotlin `iosMain`) **implement** those contracts (HTTP, DB, auth, secure storage).
 - **Outer ring**: **UI** and **platform-exclusive** apps (Watch, widgets) talk only to **shared use cases** or **shared repositories**, not to raw Retrofit/URLSession everywhere.
 
+### 2.1 Current implementation snapshot (not the roadmap — what's actually built today)
+
+The rings above are the long-term target. Today, only three kinds of things actually live in `commonMain`: **models**, **pure logic**, and **repository interfaces** — no concrete database, network client, or UI widget crosses the platform boundary. Everything else — storage, DI, and 100% of the UI — is written natively, once per platform, against those shared contracts.
+
+```mermaid
+flowchart TB
+  subgraph CM["shared/commonMain — written once"]
+    Models["Models<br/>UserProfile, NutritionModels, StreakData,<br/>ActivityLevel, Gender, MealType"]
+    Logic["Pure logic<br/>CalorieGoalCalculator, StreakLogic,<br/>MealValidation, DateKey"]
+    Contracts["Repository interfaces<br/>UserProfileRepository, NutritionRepository,<br/>StreakRepository, ProfileGateRepository,<br/>UserSessionRepository, ThemePreferenceRepository"]
+  end
+
+  APlat["androidMain<br/>Platform.android.kt — nearly unused"]
+  IPlat["iosMain<br/>UserSessionRepositoryImpl.kt<br/>ThemePreferenceRepositoryImpl.kt"]
+  CM --> APlat
+  CM --> IPlat
+
+  subgraph Android["Android"]
+    AUI["':app' — Compose + Hilt MVI<br/>AddMealScreen, ProfileOnboardingViewModel"]
+    AData["':data' — Room + Firestore + Auth + OkHttp<br/>UserProfileRepositoryImpl, StreakRepositoryImpl"]
+    AUI --> AData
+  end
+
+  subgraph iOS["iOS"]
+    IUI["ios/CalStuff — SwiftUI + manual DI<br/>MainTabView, RootViewModel, AppDependencies"]
+    IData["ios/CalStuff/Data — Firebase iOS SDK + Keychain<br/>UserProfileFirestoreRepository.swift"]
+    IUI --> IData
+  end
+
+  Contracts -. implements .-> AData
+  Contracts -. "implements (as Swift protocols)" .-> IData
+  Models --> AUI
+  Models --> IUI
+  Logic --> AUI
+  Logic --> IUI
+```
+
+Two asymmetries worth knowing about:
+
+| Question | Answer |
+|---|---|
+| Why is `androidMain` basically empty? | `:data` already implements the `commonMain` interfaces directly in Kotlin (Room + Firestore + OkHttp), so there's nothing left for an Android `actual` to do. |
+| Why is `iosMain` only 2 files? | Everything else is written in Swift instead. `ios/CalStuff/Data/*.swift` types (e.g. `UserProfileFirestoreRepository`) conform to the *same* `commonMain` interfaces — Kotlin/Native interop exposes them to Swift as protocols — but call the Firebase iOS SDK directly (`addSnapshotListener` etc.) instead of routing through Kotlin. Only session and theme-preference storage were simple enough to write once in Kotlin `iosMain` rather than twice in Swift. |
+| How does each platform wire the implementations in? | Android uses Hilt (`DataModule.kt`); iOS wires the same contracts by hand in `AppDependencies.swift`. Both hand a `UserProfileRepository` interface to their UI layer — never a raw Firestore/Room type. |
+| How does `commonMain` reach iOS at all? | Gradle compiles it into a static `CalStuffShared.framework`; an Xcode pre-build script runs `:shared:link<Config>Framework<Target>` before Swift compiles against it. |
+
+### 2.2 A concrete example: what happens when you save a meal
+
+Both platforms call the exact same `commonMain` method — `NutritionRepository.addMeal(year, month, day, meal)` — but the implementations genuinely diverge: Android is **local-first through Room**, iOS is **direct-to-Firestore with a live listener**. They only meet again at the interface call and at the Firestore document they both end up writing.
+
+```mermaid
+sequenceDiagram
+    participant AndroidUI as Android UI<br/>(Compose + NutritionViewModel)
+    participant ARepo as NutritionRepositoryImpl
+    participant Room as Room (local cache)
+    participant FS as Firestore<br/>users/{uid}/nutrition/{date}
+    participant IRepo as NutritionFirestoreRepository
+    participant iOSUI as iOS UI<br/>(SwiftUI + AddMealViewModel)
+
+    AndroidUI->>ARepo: addMeal(year, month, day, meal)
+    ARepo->>Room: insertMeal(pendingSync = true)
+    Room-->>AndroidUI: Flow emits instantly — UI updates first
+    ARepo->>FS: pushDayToFirestore() [background]
+
+    iOSUI->>IRepo: addMeal(year, month, day, meal)
+    IRepo->>FS: mutateDay() writes directly, no local cache
+    FS-->>iOSUI: addSnapshotListener fires — UI updates after the round trip
+
+    Note over ARepo,IRepo: same commonMain contract — NutritionRepository.addMeal(...)
+    Note over FS: same document shape both platforms write — DayLogDto (Kotlin) ≈ the Swift dict in NutritionFirestoreRepository
+```
+
+Android trades a bit of eventual-consistency bookkeeping (`pendingSync`, soft-deletes) for an instant, offline-friendly UI update. iOS leans on Firestore's own offline persistence + snapshot listeners instead of hand-rolling a cache — simpler code, one extra round trip before the UI reflects the write.
+
 ---
 
 ## 3. Module topology (recommended evolution)

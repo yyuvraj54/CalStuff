@@ -5,6 +5,7 @@ import com.dusht.data.local.entity.StreakEntity
 import com.dusht.data.local.entity.toEntity
 import com.dusht.data.nutrition.dto.StreakDto
 import com.dusht.data.nutrition.dto.toDto
+import com.dusht.shared.logic.StreakLogic
 import com.dusht.shared.model.StreakData
 import com.dusht.shared.repository.StreakRepository
 import com.google.firebase.auth.FirebaseAuth
@@ -17,8 +18,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import java.text.SimpleDateFormat
-import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -48,18 +47,8 @@ class StreakRepositoryImpl @Inject constructor(
         val existing = streakDao.getStreak(uid)
             ?: StreakEntity(uid, 0, 0, "", System.currentTimeMillis())
 
-        if (existing.lastLoggedDate == todayDate) return Result.success(existing.toDomain())
-
-        val newCurrent = if (isDayBefore(existing.lastLoggedDate, todayDate)) {
-            existing.currentStreak + 1
-        } else {
-            1
-        }
-        val newStreak = StreakData(
-            currentStreak = newCurrent,
-            longestStreak = maxOf(existing.longestStreak, newCurrent),
-            lastLoggedDate = todayDate,
-        )
+        val newStreak = StreakLogic.next(existing.toDomain(), todayDate)
+        if (newStreak == existing.toDomain()) return Result.success(newStreak)
 
         // Write to Room immediately (unsynced).
         streakDao.upsertStreak(newStreak.toEntity(uid))
@@ -82,17 +71,6 @@ class StreakRepositoryImpl @Inject constructor(
         runCatching {
             val dto = streakDoc(uid).get().await().toObject(StreakDto::class.java) ?: return
             streakDao.upsertStreak(dto.toDomain().toEntity(uid, syncedAt = System.currentTimeMillis()))
-        }
-    }
-
-    private fun isDayBefore(earlier: String, later: String): Boolean {
-        return try {
-            val fmt = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-            val e = fmt.parse(earlier)?.time ?: return false
-            val l = fmt.parse(later)?.time ?: return false
-            ((l - e) / (1_000L * 60 * 60 * 24)).toInt() == 1
-        } catch (e: Exception) {
-            false
         }
     }
 }
